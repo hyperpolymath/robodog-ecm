@@ -1,1 +1,8 @@
+= Robodog ECM
+:toc: auto
 
+Enterprise Content Management automation with Robodog.
+
+== License
+
+AGPL-3.0-or-later
