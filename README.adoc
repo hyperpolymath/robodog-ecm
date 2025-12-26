@@ -1,7 +1,72 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 = Robodog ECM
 :toc: auto
+:toclevels: 3
+:icons: font
 
 Enterprise Content Management automation with Robodog.
+
+== Status
+
+[NOTE]
+====
+**Repo project specification - will be uploaded shortly**
+
+This repository is in initial scaffolding phase. Core specifications, architectural documentation, and implementation code are pending.
+====
+
+== Roadmap
+
+[cols="1,3,1", options="header"]
+|===
+|Phase |Description |Status
+
+|0. Scaffolding
+|Repository infrastructure, CI/CD, multi-forge mirroring
+|Done
+
+|1. Specification
+|Core ECM requirements, architecture docs, API contracts
+|Pending
+
+|2. Foundation
+|Base ECM primitives, storage abstraction, metadata schema
+|Pending
+
+|3. Implementation
+|Content ingestion, indexing, retrieval, automation pipelines
+|Pending
+
+|4. Integration
+|External system connectors, API surface, CLI tooling
+|Pending
+|===
+
+== Technology Stack
+
+Per the link:.claude/CLAUDE.md[Hyperpolymath Language Policy]:
+
+* **Runtime**: Deno
+* **Primary Language**: ReScript (compiles to JS)
+* **Systems/Performance**: Rust
+* **Configuration**: Nickel
+* **Package Management**: Guix / Nix / Deno
+
+== Infrastructure
+
+=== Multi-Forge Mirroring
+
+This repository automatically mirrors to:
+
+* GitLab (`gitlab.com/hyperpolymath`)
+* Codeberg (`codeberg.org/hyperpolymath`)
+* Bitbucket (`bitbucket.org/hyperpolymath`)
+
+Controlled via repository variables (`*_MIRROR_ENABLED`).
+
+=== Instant Sync
+
+Pushes and releases trigger propagation to `.git-private-farm` for coordinated multi-forge distribution.
 
 == License
 
