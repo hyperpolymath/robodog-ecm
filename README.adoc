@@ -75,4 +75,4 @@ Pushes and releases trigger propagation to `.git-private-farm` for coordinated m
 
 == License
 
-AGPL-3.0-or-later
+PMPL-1.0-or-later
