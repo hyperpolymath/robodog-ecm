@@ -1,77 +1,103 @@
-image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
-// SPDX-License-Identifier: PMPL-1.0-or-later
-// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell
-
-= Robodog ECM
-
-:toc: auto
+= Robodog ECM - Electronic Countermeasures & Defensive Technologies
+:toc:
 :toclevels: 3
-:icons: font
 
-Enterprise Content Management automation with Robodog.
+image:https://img.shields.io/badge/License-PMPL--1.0-blue.svg[License: PMPL-1.0,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Philosophy-Palimpsest-indigo.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-license"]
+image:https://img.shields.io/badge/Export_Control-Defensive_Use_Only-orange.svg[Defensive Use Only]
 
-== Status
+**EXPORT CONTROL NOTICE:** This repository contains dual-use defensive technologies for Electronic Countermeasures (ECM), cryptography, and autonomous systems coordination. All content is for defensive applications only. See EXPORT-CONTROL.md for compliance requirements.
 
-[NOTE]
-====
-**Repo project specification - will be uploaded shortly**
+== Overview
 
-This repository is in initial scaffolding phase. Core specifications, architectural documentation, and implementation code are pending.
-====
+Robodog ECM is a research platform for defensive technologies including:
 
-== Roadmap
+* **Electronic Countermeasures (ECM)** - Signal jamming, interference detection, and spectrum management
+* **Cryptographic Protocols** - Secure communications for autonomous systems
+* **Formation Control** - Distributed coordination algorithms for robotic systems
+* **Defensive Autonomy** - Collision avoidance, threat detection, and safe operation
 
-[cols="1,3,1", options="header"]
-|===
-|Phase |Description |Status
+**Primary Applications:**
+- Defensive military applications (ECM, secure comms)
+- Search and rescue coordination
+- Disaster response robot swarms
+- Secure autonomous system research
 
-|0. Scaffolding
-|Repository infrastructure, CI/CD, multi-forge mirroring
-|Done
+**Explicitly NOT for:**
+- Offensive weapons systems
+- Surveillance or tracking of individuals
+- Export to restricted countries
+- Any use violating export control regulations
 
-|1. Specification
-|Core ECM requirements, architecture docs, API contracts
-|Pending
+== Relationship to Other Projects
 
-|2. Foundation
-|Base ECM primitives, storage abstraction, metadata schema
-|Pending
+**Separate from:**
+- `anvomidav` - Figure skating choreography (civilian, export-safe)
+- `robot-vacuum-cleaner` - Domestic robot simulation (civilian)
 
-|3. Implementation
-|Content ingestion, indexing, retrieval, automation pipelines
-|Pending
-
-|4. Integration
-|External system connectors, API surface, CLI tooling
-|Pending
-|===
+**Related to:**
+- Formation control algorithms (defensive coordination)
+- Autonomous navigation (safe operation)
+- Cryptographic protocols (secure communications)
 
 == Technology Stack
 
-Per the link:.claude/CLAUDE.md[Hyperpolymath Language Policy]:
+* **Core Language:** TBD (considering Rust, Ada, or AffineScript)
+* **Cryptography:** Modern post-quantum algorithms
+* **ECM Simulation:** Software-defined radio (SDR) integration
+* **Coordination:** Distributed consensus protocols
 
-* **Runtime**: Deno
-* **Primary Language**: ReScript (compiles to JS)
-* **Systems/Performance**: Rust
-* **Configuration**: Nickel
-* **Package Management**: Guix / Nix / Deno
+== Status
 
-== Infrastructure
+**Phase:** Early Research (v0.1)
+**Completion:** ~10%
 
-=== Multi-Forge Mirroring
+**Implemented:**
+- [ ] ECM signal analysis
+- [ ] Cryptographic protocol suite
+- [ ] Formation control algorithms
+- [ ] Autonomous coordination
+- [ ] Export control compliance framework
 
-This repository automatically mirrors to:
+== Export Control Compliance
 
-* GitLab (`gitlab.com/hyperpolymath`)
-* Codeberg (`codeberg.org/hyperpolymath`)
-* Bitbucket (`bitbucket.org/hyperpolymath`)
+This project follows strict export control policies:
 
-Controlled via repository variables (`*_MIRROR_ENABLED`).
+1. **No offensive capabilities** - Defensive technologies only
+2. **No unauthorized export** - Compliance with ITAR/EAR regulations
+3. **Documented use cases** - All implementations have defensive justification
+4. **Access control** - Contributors must acknowledge export restrictions
 
-=== Instant Sync
+See `EXPORT-CONTROL.md` for full compliance requirements.
 
-Pushes and releases trigger propagation to `.git-private-farm` for coordinated multi-forge distribution.
+== Development Roadmap
+
+=== v0.1 - Foundation (Q1 2026)
+- [ ] Export control compliance framework
+- [ ] Cryptographic protocol design
+- [ ] ECM signal analysis basics
+- [ ] Formation control primitives
+
+=== v0.2 - Core Technologies (Q2 2026)
+- [ ] SDR integration for ECM testing
+- [ ] Secure communication protocols
+- [ ] Distributed coordination algorithms
+- [ ] Threat detection models
+
+=== v0.3 - Integration (Q3 2026)
+- [ ] Multi-agent simulation
+- [ ] Hardware-in-the-loop testing
+- [ ] Secure key distribution
+- [ ] Performance benchmarks
 
 == License
 
-PMPL-1.0-or-later
+PMPL-1.0-or-later (Palimpsest License)
+
+== Authors
+
+Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
+
+== Acknowledgments
+
+This research is conducted in accordance with international export control regulations and ethical guidelines for defensive autonomous systems.
