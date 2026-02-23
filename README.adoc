@@ -101,3 +101,8 @@ Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>
 == Acknowledgments
 
 This research is conducted in accordance with international export control regulations and ethical guidelines for defensive autonomous systems.
+
+
+== Architecture
+
+See link:TOPOLOGY.md[TOPOLOGY.md] for a visual architecture map and completion dashboard.

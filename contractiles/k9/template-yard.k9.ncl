@@ -1,84 +1,38 @@
 K9!
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# K9 Yard-level template: Configuration with validation
-# Security Level: Yard (Nickel evaluation with contracts)
-# Signature recommended but not required
+# K9 Yard-level template: Verified configuration with logic.
+# Security Level: Yard (Nickel evaluation only, no physical execution)
+#
+# This template is used for components that require logic (functions, 
+# recursive records) but must still be strictly attenuated.
 
 {
   pedigree = {
     schema_version = "1.0.0",
-    component_type = "TODO: describe component type (e.g., 'validated-config', 'schema')",
+    # ATTENUATION: Only allows the pure functional evaluation of Nickel code.
     security = {
       leash = 'Yard,
-      trust_level = "validated-config",
+      trust_level = "evaluated-logic",
       allow_network = false,
       allow_filesystem_write = false,
       allow_subprocess = false,
     },
     metadata = {
-      name = "TODO: component-name",
+      name = "Logic-Enhanced Template",
       version = "1.0.0",
-      description = "TODO: Brief description with validation details",
-      author = "Jonathan D.A. Jewell <jonathan.jewell@open.ac.uk>",
+      description = "Template for components requiring functional transformations.",
     },
   },
 
-  # Configuration with Nickel contracts for validation
+  # CONFIGURATION: Supports dynamic generation and verification functions.
   config = {
-    # Example: String that cannot be empty
-    name
-      | String
-      | std.string.NonEmpty
-      = "TODO: default value",
-
-    # Example: Number with range constraint
-    port
-      | Number
-      | std.contract.from_predicate (fun p => p > 0 && p < 65536)
-      = 8080,
-
-    # Example: Boolean flag
-    enabled | Bool = true,
-
-    # Example: Enum (one of several values)
-    environment
-      | [| 'Development, 'Staging, 'Production |]
-      = 'Development,
-
-    # Example: List with non-empty constraint
-    items
-      | Array String
-      | std.array.NonEmpty
-      = ["item1", "item2"],
-
-    # Example: Nested object with contracts
-    database = {
-      host | String | std.string.NonEmpty = "localhost",
-      port | Number | std.contract.from_predicate (fun p => p > 0 && p < 65536) = 5432,
-      name | String | std.string.NonEmpty = "mydb",
+    # LOGIC: Pure functions are permitted at the Yard level.
+    calculate_total = fun a b => a + b,
+    
+    settings = {
+      val_1 = 10,
+      val_2 = 20,
+      total = calculate_total val_1 val_2,
     },
-  },
-
-  # Validation rules (additional cross-field checks)
-  validation = {
-    # Example: Check that at least one item exists
-    check_items = std.array.length config.items > 0,
-
-    # Example: Check that production has secure settings
-    check_production =
-      if config.environment == 'Production then
-        config.enabled == true
-      else
-        true,
-
-    # Add your custom validation rules here
   },
 }
-
-# Usage:
-# 1. Fill in TODO items above
-# 2. Define your config with appropriate contracts
-# 3. Add validation rules in validation = { ... }
-# 4. Validate: nickel typecheck your-file.k9.ncl
-# 5. Evaluate: nickel eval your-file.k9.ncl
-# 6. If validation passes, use in your application
