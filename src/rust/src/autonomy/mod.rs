@@ -14,7 +14,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::ecm::detection::DefensiveRecommendation;
-use crate::formation::{AgentState, Position, Velocity};
+use crate::formation::{AgentState, Velocity};
 
 /// Autonomous actions — strictly defensive.
 ///
@@ -209,6 +209,8 @@ fn compute_avoidance(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use crate::formation::Position;
 
     fn make_agent(id: u32, x: f64, y: f64) -> AgentState {
         AgentState {

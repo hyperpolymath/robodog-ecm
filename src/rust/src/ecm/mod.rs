@@ -17,8 +17,8 @@ use rustfft::{FftPlanner, num_complex::Complex};
 /// Supported frequency bands for simulation.
 ///
 /// Each band corresponds to an allowed simulation range
-/// defined in the Trustfile's SPECTRUM_SECURITY section.
-#[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
+/// defined in the Trustfile's `SPECTRUM_SECURITY` section.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum FrequencyBand {
     /// 0–30 MHz: propagation modelling for SAR coordination.
     Hf,

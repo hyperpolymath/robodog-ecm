@@ -97,7 +97,7 @@ pub struct FormationParams {
 
 /// Compute desired positions for each agent in the formation.
 ///
-/// Returns a vector of (agent_id, desired_position) pairs.
+/// Returns a vector of `(agent_id, desired_position)` pairs.
 /// The autonomy module is responsible for actually moving agents
 /// to these positions while respecting safety constraints.
 #[must_use]
@@ -152,7 +152,7 @@ fn compute_wedge_offsets(n: usize, spacing: f64) -> Vec<(f64, f64)> {
     let mut offsets = vec![(0.0, 0.0)]; // Leader at origin.
     for i in 1..n {
         let side = if i % 2 == 1 { 1.0 } else { -1.0 };
-        let rank = ((i + 1) / 2) as f64;
+        let rank = i.div_ceil(2) as f64;
         offsets.push((side * rank * spacing, -rank * spacing));
     }
     offsets
@@ -184,10 +184,11 @@ fn compute_diamond_offsets(n: usize, spacing: f64) -> Vec<(f64, f64)> {
         (0.0, -spacing),   // South.
         (-spacing, 0.0),   // West.
     ];
-    for i in 0..n {
-        if i < 4 {
-            offsets.push(cardinals[i]);
-        } else {
+    for cardinal in cardinals.iter().take(n.min(4)) {
+        offsets.push(*cardinal);
+    }
+    if n > 4 {
+        for i in 4..n {
             // Extra agents fill the centre.
             let inner_idx = i - 4;
             let angle = inner_idx as f64 * std::f64::consts::PI / 3.0;

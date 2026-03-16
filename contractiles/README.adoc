@@ -1,19 +1,43 @@
-= Contractiles Template Set
+= Robodog ECM — Contractiles
 :toc:
 :sectnums:
 
-This directory contains the generalized contractiles templates. Copy the `contractiles/` directory into a new repo to establish a consistent operational, validation, trust, recovery, and intent framework.
+Operational contracts for the Robodog ECM defensive technologies platform.
 
-== Fill-In Instructions
+== Contract Types
 
-1. Update the Mustfile to reflect your real invariants (paths, schema versions, ports).
-2. Replace Trustfile.hs placeholders with your actual key paths and verification commands.
-3. Adjust Dustfile handlers to match your rollback and recovery tooling.
-4. Update Intentfile to mirror the roadmap you want the system to evolve toward.
+[cols="1,1,3"]
+|===
+| Contract | File | Purpose
 
-== Contents
+| **Must** | `must/Mustfile` | Mandatory invariants — build, test, lint, export control, SPDX headers
+| **Trust** | `trust/Trustfile.a2ml` | Integrity verification — secrets, provenance, crypto, export control, formal verification (780 lines, 18 checks)
+| **Dust** | `dust/Dustfile` | Recovery and rollback — key compromise, safety violations, ABI drift, container rollback
+| **Lust** | `lust/Intentfile` | Future intent — v0.2/v0.3 roadmap for ECM, crypto, formation, containers
+| **K9** | `k9/*.k9.ncl` | Nickel-based deployment and validation specs at Kennel/Yard/Hunt trust levels
+|===
 
-* `must/Mustfile` - required invariants and validations.
-* `trust/Trustfile.hs` - cryptographic verification steps.
-* `dust/Dustfile` - rollback and recovery semantics.
-* `lust/Intentfile` - future intent and roadmap direction.
+== Execution
+
+[source,bash]
+----
+# Run all Trustfile operational checks
+bash contractiles/trust/run-checks.sh
+
+# Run Mustfile invariants (via justfile)
+just test
+----
+
+== Trust Verification Flow
+
+```
+Trustfile.a2ml (18 checks)
+    │
+    ├── Secrets (3 checks: no .env, no keys, no tokens)
+    ├── Provenance (3 checks: author, license, SPDX)
+    ├── Export Control (4 checks: doc exists, no offensive, defensive annotation, no RF)
+    ├── Cryptographic (2 checks: no weak crypto, PQ present)
+    ├── Formal Verification (3 checks: Idris2 totality, SPARK clean, Rust unsafe)
+    ├── Container (2 checks: Chainguard pinned, no Dockerfile)
+    └── Build (1 check: Cargo.lock present)
+```

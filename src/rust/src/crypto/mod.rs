@@ -16,6 +16,14 @@
 //! | Hashing            | SHA3-512              | SHAKE256       |
 //! | KDF                | HKDF-SHA3-512         | —              |
 
+use pqcrypto_traits::kem::{
+    Ciphertext as KemCiphertextTrait, PublicKey as KemPublicKeyTrait,
+    SecretKey as KemSecretKeyTrait, SharedSecret as KemSharedSecretTrait,
+};
+use pqcrypto_traits::sign::{
+    PublicKey as SigPublicKeyTrait, SecretKey as SigSecretKeyTrait,
+    SignedMessage as SigSignedMessageTrait,
+};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -206,7 +214,6 @@ pub fn verify(
             let sig = pqcrypto_dilithium::dilithium5::SignedMessage::from_bytes(signed_message)
                 .map_err(|_| CryptoError::SignatureVerification)?;
             pqcrypto_dilithium::dilithium5::open(&sig, &pk)
-                .map(|m| m.to_vec())
                 .map_err(|_| CryptoError::SignatureVerification)
         }
         SignatureAlgorithm::SphincsPlusSha2256f => {
@@ -215,7 +222,6 @@ pub fn verify(
             let sig = pqcrypto_sphincsplus::sphincssha2256fsimple::SignedMessage::from_bytes(signed_message)
                 .map_err(|_| CryptoError::SignatureVerification)?;
             pqcrypto_sphincsplus::sphincssha2256fsimple::open(&sig, &pk)
-                .map(|m| m.to_vec())
                 .map_err(|_| CryptoError::SignatureVerification)
         }
     }

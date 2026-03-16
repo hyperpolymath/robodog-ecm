@@ -1,35 +1,43 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# Mustfile - declarative state contract (template)
-# See: https://github.com/hyperpolymath/mustfile
+# Mustfile — Mandatory invariants for Robodog ECM
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 version: 1
 
 metadata:
-  name: project-state-contract
-  spec: v0.0.1
-  description: "Invariant checks for config, policy, gateway, logs, and schema."
-
-parameters:
-  gateway_port: "8080"
-  schema_version: "v0.0.1"
+  name: robodog-ecm-state-contract
+  spec: v0.1.0
+  description: "Invariant checks for the Robodog ECM defensive technologies platform."
 
 checks:
-  - name: config-valid
-    description: "config/service.yaml must be valid."
-    run: "yq -e '.' config/service.yaml >/dev/null"
+  - name: trustfile-passes
+    description: "All Trustfile operational checks must pass (zero critical failures)."
+    run: "bash contractiles/trust/run-checks.sh"
 
-  - name: policy-compiles
-    description: "policy/policy.ncl must compile."
-    run: "nickel check policy/policy.ncl"
+  - name: rust-compiles
+    description: "Rust core must compile without errors."
+    run: "cd src/rust && cargo check 2>/dev/null"
 
-  - name: gateway-exposes-port
-    description: "Service must expose the configured port."
-    run: "bash -uc 'ss -lnt | rg \":${GATEWAY_PORT:-8080}\"'"
+  - name: rust-tests-pass
+    description: "All Rust unit tests must pass."
+    run: "cd src/rust && cargo test --quiet 2>/dev/null"
 
-  - name: logs-are-json
-    description: "Logs must be JSON."
-    run: "bash -uc 'rg --files -g \"*.json\" logs | xargs -r jq -e .'"
+  - name: rust-clippy-clean
+    description: "Clippy must report no warnings."
+    run: "cd src/rust && cargo clippy --quiet -- -D warnings 2>/dev/null"
 
-  - name: schema-version-matches
-    description: "Schema must match version spec."
-    run: "bash -uc 'rg -n \"${SCHEMA_VERSION:-v0.0.1}\" schema'"
+  - name: defensive-annotation
+    description: "lib.rs must contain DEFENSIVE USE ONLY annotation."
+    run: "grep -q 'DEFENSIVE USE ONLY' src/rust/src/lib.rs"
+
+  - name: export-control-present
+    description: "EXPORT-CONTROL.md must exist."
+    run: "test -f EXPORT-CONTROL.md"
+
+  - name: no-banned-patterns
+    description: "No believe_me, assert_total, or pragma Suppress in source."
+    run: "! grep -rPn '\\bbelieve_me\\b|\\bassert_total\\b|\\bpragma Suppress\\b' src/ 2>/dev/null | head -1 | grep -q ."
+
+  - name: spdx-on-source
+    description: "All source files have SPDX license headers."
+    run: "! find src/ api/ ffi/ -type f \\( -name '*.rs' -o -name '*.v' -o -name '*.idr' -o -name '*.ads' -o -name '*.adb' -o -name '*.zig' \\) | xargs grep -L 'SPDX-License-Identifier' 2>/dev/null | head -1 | grep -q ."

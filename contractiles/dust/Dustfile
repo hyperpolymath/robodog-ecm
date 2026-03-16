@@ -1,29 +1,48 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# Dustfile template - recovery and rollback semantics
+# Dustfile — Recovery and rollback semantics for Robodog ECM
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
 version: 1
 
 recovery:
-  logs:
-    - name: decision-log
-      path: logs/decisions.json
-      reversible: true
-      handler: "log-replay --reverse logs/decisions.json"
+  crypto-key-compromise:
+    - name: pq-key-rotation
+      event: "key.compromise"
+      undo: "just gen-keys && cerro-sign rotate --key-id robodog-ecm-release"
+      notes: "Rotate all PQ keypairs (Kyber1024, Dilithium5, SPHINCS+). Invalidate old ciphertexts."
 
-  policy:
-    - name: policy-rollback
-      path: policy/policy.ncl
-      rollback: "git checkout HEAD~1 -- policy/policy.ncl"
-      notes: "Rollback policy to the previous known-good revision."
+  formation-safety-violation:
+    - name: emergency-safe-state
+      event: "safety.violation.separation"
+      undo: "All agents transition to safe-state (hover/stop). Human-in-the-loop required to resume."
+      notes: "SPARK-proven safe-state is always reachable. Comms loss also triggers this."
 
-  gateway:
-    - name: bad-deployment
+  abi-drift:
+    - name: abi-rollback
+      event: "abi.typecheck.failure"
+      undo: "git checkout HEAD~1 -- src/abi/"
+      notes: "Rollback Idris2 ABI to last known-good. Zig FFI and V API must re-verify."
+
+  container-supply-chain:
+    - name: container-rollback
       event: "deploy.failure"
-      undo: "kubectl rollout undo deployment/gateway"
-      notes: "Undo a failed deployment while preserving audit logs."
+      undo: "ct verify <previous.ctp> && ct push <previous.ctp> <registry>"
+      notes: "Rollback to previous cerro-torre bundle. Verify signature before push."
 
-  dust-events:
-    - name: decision-log-to-dust
-      source: logs/decisions.json
-      transform: "dustify --input logs/decisions.json --output logs/dust-events.json"
-      notes: "Map gateway decision logs into reversible dust events."
+  trustfile-failure:
+    - name: trustfile-block
+      event: "trustfile.critical.failure"
+      undo: "Build and deploy are blocked until all critical checks pass."
+      notes: "No bypass. Fix the source, don't suppress the check."
+
+  export-control-violation:
+    - name: export-control-revert
+      event: "export.offensive.marker.detected"
+      undo: "git revert HEAD && notify maintainer"
+      notes: "Offensive terminology in source triggers immediate revert. No exceptions."
+
+dust-events:
+  - name: safety-log-to-dust
+    source: logs/safety-events.json
+    transform: "dustify --input logs/safety-events.json --output logs/dust-events.json"
+    notes: "Map SPARK safety proof failures and separation violations to reversible dust events."

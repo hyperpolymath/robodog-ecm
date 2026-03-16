@@ -124,7 +124,6 @@ pub fn recommend_response(
         (0, 0) => DefensiveRecommendation::NoAction,
         (0, 1) => DefensiveRecommendation::IncreasedMonitoring,
         (0, _) => DefensiveRecommendation::FrequencyHop,
-        (1, _) => DefensiveRecommendation::AlertOperator,
         _ => DefensiveRecommendation::AlertOperator,
     }
 }
