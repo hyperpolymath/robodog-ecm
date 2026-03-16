@@ -42,22 +42,37 @@ Robodog ECM is a research platform for defensive technologies including:
 
 == Technology Stack
 
-* **Core Language:** TBD (considering Rust, Ada, or AffineScript)
-* **Cryptography:** Modern post-quantum algorithms
-* **ECM Simulation:** Software-defined radio (SDR) integration
-* **Coordination:** Distributed consensus protocols
+[cols="1,2,2"]
+|===
+| Layer | Language | Purpose
+
+| Core | **Rust** | ECM analysis, PQ crypto, formation control, autonomy
+| Safety | **Ada/SPARK** | Formally verified safety-critical subsystems
+| ABI | **Idris2** | Dependent-type interface proofs
+| FFI | **Zig** | C-ABI bridge between ABI and core
+| API | **V-lang** | Consumer-facing API surface
+|===
+
+* **Cryptography:** Kyber1024, Dilithium5, SPHINCS+ (NIST PQC standards)
+* **ECM Simulation:** Synthetic signal models (no real RF captures)
+* **Coordination:** Potential-field collision avoidance, formation geometry
 
 == Status
 
-**Phase:** Early Research (v0.1)
-**Completion:** ~10%
+**Phase:** v0.1 Foundation
+**Completion:** ~40%
 
 **Implemented:**
-- [ ] ECM signal analysis
-- [ ] Cryptographic protocol suite
-- [ ] Formation control algorithms
-- [ ] Autonomous coordination
-- [ ] Export control compliance framework
+- [x] ECM signal analysis (signals, detection, FFT spectrum)
+- [x] Cryptographic protocol suite (Kyber1024, Dilithium5, SPHINCS+)
+- [x] Formation control algorithms (5 shapes, separation checks)
+- [x] Defensive autonomy (collision avoidance, safe-state, comms loss)
+- [x] Export control compliance framework (ITAR/EAR/Wassenaar)
+- [x] SPARK safety specs (ECM, formation, autonomy)
+- [x] Idris2 ABI definitions (Types, ECM, Crypto, Formation, Foreign)
+- [x] Zig FFI bridge (classification, distance, formation)
+- [x] V-lang API (full type mirror, classification, recommendations)
+- [x] Comprehensive Trustfile (780 lines, 18 operational checks)
 
 == Export Control Compliance
 

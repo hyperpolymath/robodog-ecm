@@ -1,0 +1,785 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# =============================================================================
+# Trustfile.a2ml — Robodog ECM: Electronic Countermeasures & Defensive Technologies
+# Comprehensive trust contract for dual-use defensive research platform.
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+# =============================================================================
+
+---
+### [META]
+id: "did:web:github.com:hyperpolymath:robodog-ecm"
+version: "0.1.0"
+context:
+  - "https://a2ml.org/ns/v2"
+  - "https://idris-lang.org"
+  - "https://hypatia.scans/ns/v1"
+  - "https://w3id.org/security/v4"
+  - "https://w3id.org/transparency/v1"
+  - "https://www.wassenaar.org/control-lists/"
+meta:
+  generated: "2026-03-16T00:00:00Z"
+  expires: "2027-03-16T00:00:00Z"
+  classification: "dual-use-defensive"
+  export_control:
+    framework: "UK Export Control Act 2002"
+    wassenaar_categories: ["5A2", "11"]
+    defensive_only: true
+  signature:
+    algorithm: "Ed448+Dilithium5"
+    value: |
+      -----BEGIN HYBRID SIGNATURE-----
+      BASE64_Ed448+Dilithium5_SIGNATURE_OF_THIS_FILE
+      -----END HYBRID SIGNATURE-----
+    signedBy: "did:web:github.com:hyperpolymath:robodog-ecm#primary-sig"
+    proof: "src/abi/Proofs/Trustfile.idr"
+  fallbackSignature:
+    algorithm: "SPHINCS+"
+    value: |
+      -----BEGIN SPHINCS+ SIGNATURE-----
+      BASE64_SPHINCS+_SIGNATURE_OF_THIS_FILE
+      -----END SPHINCS+ SIGNATURE-----
+  integrity:
+    sha3-512: "HEX_SHA3_512_OF_THIS_FILE"
+    shake256: "BASE32_SHAKE256_OF_THIS_FILE"
+  ci_cd:
+    github_actions: "https://github.com/hyperpolymath/robodog-ecm/blob/main/.github/workflows/trustfile.yml"
+    gitbot_fleet: "https://gitbot-fleet.hyperpolymath.dev/hooks/trustfile"
+    hypatia_scan: "https://hypatia.scans/repos/robodog-ecm"
+  automation:
+    hashing: ["SHA3-512", "SHAKE256", "BLAKE3"]
+    diffing: "alert-on-unexpected-changes"
+    integrity: ["idris2-proof-validity", "spark-proof-validity", "transparency-log-continuity"]
+
+---
+### [EXPORT_CONTROL]
+overview: |
+  This project contains dual-use defensive technologies subject to export
+  control regulations. All technology development is constrained to defensive
+  applications only. Offensive capabilities are structurally excluded by
+  formal verification (Idris2 dependent types + SPARK proofs).
+
+classification:
+  primary_framework: "UK Export Control Act 2002"
+  secondary_frameworks:
+    - "Wassenaar Arrangement (Dual-Use Goods and Technologies)"
+    - "EU Dual-Use Regulation (EU 2021/821)"
+  categories:
+    - id: "5A2"
+      description: "Information Security — Cryptographic systems"
+      components: ["src/rust/src/crypto/", "src/abi/Crypto.idr"]
+      notes: |
+        Post-quantum cryptographic implementations (Kyber1024, Dilithium5,
+        SPHINCS+) for secure autonomous system communications. Open-source
+        publication may qualify for research/public domain exemptions under
+        Wassenaar Note 3 to Category 5 Part 2.
+    - id: "11"
+      description: "Military Electronics"
+      components: ["src/rust/src/ecm/", "src/rust/src/formation/", "src/rust/src/autonomy/", "src/spark/"]
+      notes: |
+        ECM signal analysis, formation control, and defensive autonomy.
+        Limited to defensive countermeasures (jamming detection, spectrum
+        monitoring, collision avoidance). No targeting or offensive systems.
+
+defensive_only_policy:
+  permitted:
+    - "Defensive electronic countermeasures (communications protection)"
+    - "Search and rescue multi-robot coordination"
+    - "Post-quantum secure communications research"
+    - "Civilian infrastructure spectrum monitoring"
+    - "Academic research (published, peer-reviewed)"
+  prohibited:
+    - "Offensive weapons systems or targeting"
+    - "Mass surveillance or individual tracking"
+    - "Offensive signal jamming (disrupting civilian/emergency comms)"
+    - "Autonomous lethal decision-making"
+    - "Export to embargoed/sanctioned entities"
+  enforcement:
+    source_level: "DEFENSIVE USE ONLY annotation required on all controlled modules"
+    ci_cd: "hypatia-scan offensive-terminology check on every push"
+    formal: "Idris2 types structurally exclude offensive capability construction"
+    build: "Trustfile verification mandatory before any build or deployment"
+
+contributor_requirements:
+  acknowledgment: "Export-Control-Acknowledged: yes (in first commit message)"
+  verification: "Not acting on behalf of sanctioned entities (UK/EU/UN lists)"
+  review: |
+    PRs touching crypto, signal processing, autonomous decision-making,
+    formation control, or hardware interfaces require explicit export
+    control review before merge.
+
+security:
+  proof: "src/abi/Proofs/ExportControl.idr"
+  ci_cd: "validate-export-compliance-on-push"
+
+---
+### [THREAT_MODEL]
+overview: |
+  Threat model for a defensive ECM research platform. Primary threats are
+  supply chain compromise, signal interception of research outputs, and
+  misuse of dual-use technology. Standard web threats (DDoS, XSS) are
+  secondary — this is primarily a local-build research codebase.
+
+adversaries:
+  - type: "Supply Chain Compromise"
+    description: "Attacker tampers with dependencies, build tools, or CI to inject malicious code"
+    mitigations:
+      - "Cargo.lock pinning → Reproducible Rust builds."
+      - "SHA-pinned GitHub Actions → No workflow injection."
+      - "Chainguard base images → CVE-free container supply chain."
+      - "cerro-torre .ctp bundles → Cryptographically signed container artifacts."
+      - "Idris2 ABI proofs → Type-level verification of interface correctness."
+      - "SPARK proofs → Formal verification of safety-critical code paths."
+
+  - type: "Quantum Adversary"
+    description: "Nation-state with quantum computing capability targeting crypto protocols"
+    mitigations:
+      - "Kyber1024 + Dilithium5 → PQ-resistant key exchange and signatures."
+      - "SPHINCS+ fallback → Hash-based signature crypto agility."
+      - "Hybrid classical+PQ → Defense-in-depth against partial quantum breaks."
+      - "Algorithm agility traits → Swap primitives without protocol redesign."
+      - "GitBot-Fleet → Automated key rotation on compromise detection."
+
+  - type: "Signal Intelligence (SIGINT)"
+    description: "Adversary intercepts or analyses research outputs to derive offensive capability"
+    mitigations:
+      - "Export control annotations → Controlled technology clearly marked."
+      - "Defensive-only type constraints → Idris2 types structurally prevent offensive use."
+      - "No raw signal data in repo → Simulation-only, no real spectrum captures."
+      - "Compartmentalised modules → ECM analysis separate from formation control."
+
+  - type: "Technology Diversion"
+    description: "Dual-use technology redirected to prohibited end-use or end-user"
+    mitigations:
+      - "EXPORT-CONTROL.md → Explicit use restrictions and compliance framework."
+      - "Contributor acknowledgment → All contributors affirm defensive-only intent."
+      - "CI enforcement → Automated scanning for offensive terminology and capability markers."
+      - "PMPL license → Palimpsest license preserves ethical use intent."
+
+  - type: "Insider Threat (Malicious Contribution)"
+    description: "Contributor introduces offensive capability disguised as defensive feature"
+    mitigations:
+      - "Export control PR review → Mandatory for all controlled-technology changes."
+      - "Trustfile verification → Build-time checks for offensive markers."
+      - "Hypatia neurosymbolic scan → Pattern-based detection of capability escalation."
+      - "Idris2 totality checking → No partial functions, no believe_me, no escape hatches."
+      - "SPARK proof obligations → Safety properties machine-verified, not human-asserted."
+
+  - type: "Build Environment Compromise"
+    description: "Attacker targets developer workstation or CI runner to inject code"
+    mitigations:
+      - "Reproducible builds → Cargo.lock + pinned toolchains."
+      - "Rootless Podman → No Docker daemon, no privilege escalation."
+      - "Signed commits → Git author verification."
+      - "Two-party review → No self-merge on controlled modules."
+
+---
+### [FORMAL_VERIFICATION]
+overview: |
+  Robodog ECM uses a two-tier formal verification strategy:
+  1. Idris2 dependent types for ABI correctness (interface-level proofs)
+  2. SPARK/Ada for safety-critical runtime code (implementation-level proofs)
+  This combination ensures that both the protocol contracts AND the
+  executing code are formally verified.
+
+idris2:
+  purpose: "ABI definitions with dependent type proofs"
+  location: "src/abi/"
+  totality: "All functions must be total. No partial, believe_me, or assert_total."
+  banned_patterns:
+    - "believe_me"
+    - "assert_total"
+    - "partial"
+    - "unsafePerformIO"
+    - "unsafeCoerce"
+  modules:
+    - name: "Types.idr"
+      description: "Core type universe — signals, frequencies, formations, crypto primitives"
+      status: "v0.1"
+    - name: "ECM.idr"
+      description: "ECM signal types with spectral validity proofs"
+      status: "v0.1"
+    - name: "Crypto.idr"
+      description: "Post-quantum algorithm types with key size proofs"
+      status: "v0.1"
+    - name: "Formation.idr"
+      description: "Formation geometry types with distance invariants"
+      status: "v0.1"
+    - name: "Foreign.idr"
+      description: "FFI foreign function declarations (Zig bridge)"
+      status: "v0.1"
+  security:
+    proof: "src/abi/Proofs/Totality.idr"
+    ci_cd: "idris2-typecheck-on-push"
+
+spark:
+  purpose: "Safety-critical runtime code with GNAT proof obligations"
+  location: "src/spark/"
+  level: "SPARK Silver (absence of runtime errors + functional correctness)"
+  modules:
+    - name: "ECM_Safety"
+      description: "Signal power bounds, frequency range validation"
+      status: "v0.1"
+    - name: "Formation_Safety"
+      description: "Collision avoidance distance proofs, formation geometry bounds"
+      status: "v0.1"
+    - name: "Autonomy_Safety"
+      description: "Defensive response bounds, safe-state guarantees"
+      status: "v0.1"
+  banned_patterns:
+    - "pragma Suppress"
+    - "Unchecked_Conversion"
+    - "Unchecked_Deallocation"
+    - "Unchecked_Access"
+  security:
+    proof: "src/spark/proof/"
+    ci_cd: "gnatprove-on-push"
+
+---
+### [TRUSTFILE_KEYS]
+issuer: "did:web:github.com:hyperpolymath:robodog-ecm"
+keys:
+  - id: "#primary-sig"
+    type: "HybridKey2024"
+    classical:
+      algorithm: "Ed448"
+      publicKeyJwk:
+        kty: "OKP"
+        crv: "Ed448"
+        x: "BASE64URL_Ed448_PUBLIC_KEY"
+    postQuantum:
+      algorithm: "Dilithium5"
+      publicKeyJwk:
+        kty: "OKP"
+        crv: "Dilithium5"
+        x: "BASE64URL_Dilithium5_PUBLIC_KEY"
+    fallback:
+      algorithm: "SPHINCS+"
+      publicKeyJwk:
+        kty: "OKP"
+        crv: "SPHINCS+"
+        x: "BASE64URL_SPHINCS+_PUBLIC_KEY"
+    usage: ["authentication", "assertion"]
+    security:
+      proof: "src/abi/Proofs/CryptoKeys.idr"
+      hypatia: "scan-keys"
+      ci_cd: "rotate-keys-on-compromise"
+algorithms:
+  hashing: ["SHA3-512", "SHAKE256", "BLAKE3"]
+  kdf: "HKDF-SHAKE512"
+  rng: "ChaCha20-DRBG"
+  keyEncapsulation: "Kyber1024"
+  signatures: "Ed448+Dilithium5 (primary), SPHINCS+ (fallback)"
+  symmetricEncryption: "AES-256-GCM, ChaCha20-Poly1305"
+  security:
+    proof: "src/abi/Proofs/CryptoAlgorithms.idr"
+fallbacks:
+  signatures: ["Ed448+Dilithium5", "SPHINCS+"]
+  keyExchange: ["Kyber1024-X25519", "X25519"]
+
+---
+### [TECHNOLOGY_STACK]
+overview: |
+  Five-language architecture with formal verification at every boundary.
+  Each language serves a specific role in the trust chain.
+
+languages:
+  - name: "Rust"
+    role: "Core implementation"
+    location: "src/rust/"
+    components: ["ecm", "crypto", "formation", "autonomy"]
+    build: "cargo build --release"
+    test: "cargo test"
+    security:
+      supply_chain: "Cargo.lock pinned, cargo-audit in CI"
+      memory_safety: "Safe Rust by default, unsafe blocks require justification comment"
+      banned: ["unsafe (without justification)", "std::mem::transmute", "std::ptr::null"]
+
+  - name: "Ada/SPARK"
+    role: "Safety-critical subsystems"
+    location: "src/spark/"
+    components: ["ecm_safety", "formation_safety", "autonomy_safety"]
+    build: "gprbuild -P robodog_ecm.gpr"
+    prove: "gnatprove -P robodog_ecm.gpr --level=2"
+    security:
+      formal_verification: "SPARK Silver level (no runtime errors + functional correctness)"
+      runtime: "No dynamic allocation, no exceptions, no tasking in proven code"
+
+  - name: "Idris2"
+    role: "ABI definitions and interface proofs"
+    location: "src/abi/"
+    components: ["Types", "ECM", "Crypto", "Formation", "Foreign"]
+    build: "idris2 --check src/abi/Types.idr"
+    security:
+      totality: "All functions total, compiler-enforced"
+      dependent_types: "Proof-carrying interfaces — invalid states unrepresentable"
+
+  - name: "Zig"
+    role: "FFI bridge (C-ABI compatible)"
+    location: "ffi/zig/"
+    components: ["ecm_ffi", "crypto_ffi", "formation_ffi"]
+    build: "zig build"
+    test: "zig build test"
+    security:
+      memory_safety: "Compile-time bounds checking, no hidden allocations"
+      abi_compat: "Native C ABI, zero runtime overhead"
+
+  - name: "V"
+    role: "API layer (consumer-facing)"
+    location: "api/v/"
+    components: ["ecm_api", "crypto_api", "formation_api"]
+    build: "v build api/v/"
+    test: "v test api/v/"
+    security:
+      input_validation: "All external inputs validated at API boundary"
+      abi_verification: "Types checked against Idris2 ABI definitions"
+
+---
+### [CONTAINER_SUPPLY_CHAIN]
+overview: |
+  Container supply-chain verification via the stapeln ecosystem.
+  All container images built with Podman on Chainguard Wolfi base
+  images, signed as .ctp bundles via cerro-torre, and governed by
+  svalinn edge gateway policies. Runtime monitoring provided by vordr.
+  Defence-grade supply chain for dual-use technology.
+
+runtime:
+  engine: "Podman"
+  policy: "Rootless containers only. Never Docker."
+  socket: "${XDG_RUNTIME_DIR}/podman/podman.sock"
+  security:
+    proof: "src/abi/Proofs/ContainerRuntime.idr"
+
+base_images:
+  provider: "Chainguard"
+  registry: "cgr.dev/chainguard/"
+  allowed:
+    - "cgr.dev/chainguard/wolfi-base:latest"
+    - "cgr.dev/chainguard/static:latest"
+    - "cgr.dev/chainguard/rust:latest"
+  policy: "Only Chainguard images permitted as base. Rebuilt daily, CVE-free."
+  security:
+    proof: "src/abi/Proofs/ContainerBaseImages.idr"
+    ci_cd: "scan-base-images-daily"
+
+verified_bundles:
+  format: ".ctp"
+  tool: "cerro-torre"
+  operations:
+    pack: "ct pack <image> -o <bundle.ctp>"
+    sign: "cerro-sign sign <bundle.ctp> --key-id <key>"
+    verify: "ct verify <bundle.ctp>"
+    push: "ct push <bundle.ctp> <registry/image:tag>"
+    explain: "ct explain <bundle.ctp>"
+  attestations:
+    required: ["source-signature", "sbom-complete", "export-control-review"]
+    recommended: ["security-audit", "reproducible-build", "spark-proofs-pass"]
+  security:
+    proof: "src/abi/Proofs/ContainerBundles.idr"
+    hypatia: "scan-ctp-bundles"
+
+gateway:
+  tool: "svalinn"
+  policy_file: "container/.gatekeeper.yaml"
+  capabilities:
+    - "JWT/OAuth2 authentication"
+    - "Rate limiting (per-client, per-endpoint)"
+    - "Container trust enforcement (.ctp signature verification)"
+    - "Request validation (body size, NaN/Inf rejection)"
+    - "Export control metadata verification"
+    - "Audit logging for all operations"
+    - "TLS auto-provisioning"
+  security:
+    proof: "src/abi/Proofs/ContainerGateway.idr"
+    ci_cd: "validate-gatekeeper-policy-on-push"
+
+monitoring:
+  tool: "vordr"
+  config_file: "container/vordr.toml"
+  capabilities:
+    - "Health endpoint monitoring"
+    - "Container crash detection"
+    - "Resource usage thresholds (CPU, memory, disk)"
+    - "Structured JSON log output"
+    - "Automatic restart on failure (configurable)"
+    - "Anomaly detection (unexpected network traffic patterns)"
+  security:
+    proof: "src/abi/Proofs/ContainerMonitoring.idr"
+
+signing:
+  algorithm: "Ed25519"
+  tool: "cerro-torre sign / cerro-sign"
+  key_management: |
+    Signing keys are project-specific. Each service has a dedicated
+    Ed25519 key pair (e.g. robodog-ecm-release). Public keys are
+    distributed in .gatekeeper.yaml trusted_signers section.
+    Key rotation is automated via GitBot-Fleet on compromise detection.
+  security:
+    proof: "src/abi/Proofs/ContainerSigning.idr"
+    ci_cd: "rotate-signing-keys-on-compromise"
+
+deployment:
+  tool: "k9-svc"
+  spec_file: "container/deploy.k9.ncl"
+  trust_level: "Hunt"
+  description: |
+    k9-svc deployment at Hunt trust level. Full pedigree
+    (L1-L5: identity, target, security, validation, recipes).
+    Requires cryptographic handshake before execution.
+    Export control metadata checked before deployment.
+  security:
+    proof: "src/abi/Proofs/ContainerDeployment.idr"
+    ci_cd: "validate-k9-pedigree-on-push"
+
+---
+### [SPECTRUM_SECURITY]
+overview: |
+  ECM-specific security controls for signal analysis and spectrum
+  management. All spectrum operations are simulation-only — no raw
+  RF captures are stored in this repository.
+
+simulation_only:
+  policy: "No real RF spectrum data in repository. Simulation models only."
+  enforcement: "CI check for RF capture file formats (.iq, .cf32, .wav >1MHz sample rate)"
+  reason: |
+    Real spectrum captures may contain classified or export-controlled
+    information depending on frequency bands and geographic context.
+    All testing uses synthetic signal models.
+
+signal_types:
+  - name: "Narrowband Interference"
+    classification: "Uncontrolled (defensive analysis)"
+    module: "src/rust/src/ecm/signals.rs"
+  - name: "Wideband Jamming Patterns"
+    classification: "Wassenaar Cat 11 (defensive countermeasure)"
+    module: "src/rust/src/ecm/jamming.rs"
+  - name: "Frequency Hopping Detection"
+    classification: "Wassenaar Cat 5A2 / Cat 11"
+    module: "src/rust/src/ecm/detection.rs"
+
+frequency_policy:
+  allowed_simulation_bands:
+    - range: "0-30 MHz (HF)"
+      notes: "Propagation modelling for SAR coordination"
+    - range: "30-300 MHz (VHF)"
+      notes: "Formation communication simulation"
+    - range: "300 MHz-3 GHz (UHF)"
+      notes: "General purpose ECM simulation"
+    - range: "3-30 GHz (SHF)"
+      notes: "Radar countermeasure simulation"
+  prohibited_real_captures:
+    - "Military bands (unless explicitly authorised)"
+    - "Emergency services frequencies"
+    - "Satellite downlink bands"
+    - "Any band requiring Ofcom licence for passive monitoring"
+
+security:
+  proof: "src/abi/Proofs/SpectrumSafety.idr"
+  ci_cd: "scan-for-rf-captures-on-push"
+
+---
+### [AUTONOMOUS_SAFETY]
+overview: |
+  Safety constraints for autonomous system coordination. These are
+  formally verified via SPARK proofs and structurally enforced via
+  Idris2 dependent types. The system CANNOT construct an autonomous
+  lethal decision — the types make it unrepresentable.
+
+safety_invariants:
+  - name: "No autonomous lethal decisions"
+    enforcement: "Type-level (Idris2: no constructor for LethalAction)"
+    proof: "src/abi/Proofs/NoLethal.idr"
+    status: "specified"
+    target: "v0.1"
+
+  - name: "Minimum safe separation distance"
+    enforcement: "SPARK proof obligation"
+    proof: "src/spark/proof/Formation_Safety.mlw"
+    value: "Configurable per-mission, minimum 2.0m for ground, 10.0m for aerial"
+    status: "specified"
+    target: "v0.1"
+
+  - name: "Collision avoidance always active"
+    enforcement: "SPARK proof obligation — cannot be disabled at runtime"
+    proof: "src/spark/proof/Autonomy_Safety.mlw"
+    status: "specified"
+    target: "v0.1"
+
+  - name: "Safe-state reachability"
+    enforcement: "SPARK proof — system can always reach a safe hover/stop state"
+    proof: "src/spark/proof/SafeState.mlw"
+    status: "specified"
+    target: "v0.2"
+
+  - name: "Communication loss → safe state"
+    enforcement: "SPARK timeout proof — loss of comms triggers safe-state transition"
+    proof: "src/spark/proof/CommsLoss.mlw"
+    timeout: "3 seconds configurable"
+    status: "specified"
+    target: "v0.2"
+
+human_control:
+  policy: "Human-on-the-loop minimum. Human-in-the-loop for any action affecting other agents."
+  override: "Physical kill switch required for any hardware deployment."
+  audit: "All autonomous decisions logged with full decision chain."
+
+security:
+  proof: "src/abi/Proofs/AutonomousSafety.idr"
+  ci_cd: "verify-safety-invariants-on-push"
+
+---
+### [CI_CD]
+github_actions:
+  name: "Robodog ECM CI"
+  on: ["push", "pull_request"]
+  jobs:
+    trustfile_verify:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - name: "Run Trustfile Checks"
+          run: "bash contractiles/trust/run-checks.sh"
+    rust_build:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - uses: "dtolnay/rust-toolchain@stable"
+        - name: "Build"
+          run: "cd src/rust && cargo build --release"
+        - name: "Test"
+          run: "cd src/rust && cargo test"
+        - name: "Clippy"
+          run: "cd src/rust && cargo clippy -- -D warnings"
+        - name: "Audit"
+          run: "cargo install cargo-audit && cd src/rust && cargo audit"
+    spark_prove:
+      runs-on: "ubuntu-latest"
+      container: "ghcr.io/alire-project/gnat:latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - name: "GNATprove"
+          run: "cd src/spark && gnatprove -P robodog_ecm.gpr --level=2"
+    idris2_check:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - name: "Install Idris2"
+          run: "pack install-idris2"
+        - name: "Typecheck ABI"
+          run: "cd src/abi && idris2 --check Types.idr"
+    zig_build:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - name: "Build FFI"
+          run: "cd ffi/zig && zig build"
+        - name: "Test FFI"
+          run: "cd ffi/zig && zig build test"
+    export_control:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - name: "Check EXPORT-CONTROL.md exists"
+          run: "test -f EXPORT-CONTROL.md"
+        - name: "Scan for offensive markers"
+          run: |
+            ! grep -rEi '(offensive.weapon|lethal.force|targeting.system|kill.chain)' \
+              --include='*.rs' --include='*.v' --include='*.idr' \
+              --include='*.ads' --include='*.adb' --include='*.zig' . 2>/dev/null \
+              | head -1 | grep -q .
+        - name: "Verify defensive annotations"
+          run: "grep -rq 'DEFENSIVE USE ONLY' src/rust/src/lib.rs"
+    hypatia_scan:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v5"
+        - name: "Hypatia Scan"
+          run: "hypatia scan --config .hypatia/hypatia.yml"
+
+gitbot_fleet:
+  hooks:
+    - type: "pre-commit"
+      script: "bash contractiles/trust/run-checks.sh"
+    - type: "post-merge"
+      script: "gitbot-fleet diff --file contractiles/trust/Trustfile.a2ml"
+hypatia:
+  config: ".hypatia/hypatia.yml"
+  scans:
+    - type: "export-control"
+      frequency: "on-push"
+    - type: "crypto"
+      frequency: "on-push"
+    - type: "supply-chain"
+      frequency: "weekly"
+
+---
+### [AUTOMATION]
+hashing:
+  tool: "GitBot-Fleet"
+  triggers: ["pre-commit", "post-merge"]
+  algorithms: ["SHA3-512", "SHAKE256", "BLAKE3"]
+diffing:
+  tool: "GitBot-Fleet"
+  rules:
+    - "alert-on-unexpected-changes"
+    - "require-proof-updates-for-abi-changes"
+    - "require-export-review-for-controlled-modules"
+integrity:
+  tool: "Hypatia + Idris2 + GNATprove"
+  checks:
+    - "idris2-totality-enforced"
+    - "spark-proofs-valid"
+    - "transparency-log-continuity"
+    - "no-banned-patterns-in-source"
+    - "export-control-annotations-present"
+
+---
+### [OPERATIONAL_CHECKS]
+# These are the executable verification checks run by the Trustfile.
+# Each check is a shell command that returns 0 on success, non-zero on failure.
+
+# ── Secrets ──────────────────────────────────────────────────────────────────
+
+### no-secrets-committed
+- description: No credential files in repo
+- run: test ! -f .env && test ! -f credentials.json && test ! -f .env.local && test ! -f .env.production
+- severity: critical
+
+### no-private-keys
+- description: No private key files committed
+- run: "! find . -name '*.pem' -o -name '*.key' -o -name 'id_rsa' -o -name 'id_ed25519' 2>/dev/null | grep -v target | head -1 | grep -q ."
+- severity: critical
+
+### no-tokens-in-source
+- description: No hardcoded API tokens in source
+- run: "! grep -rE '(api[_-]?key|secret|token|password)\\s*[:=]\\s*[\"'\\'''][A-Za-z0-9]{16,}' --include='*.rs' --include='*.v' --include='*.idr' --include='*.ads' --include='*.adb' --include='*.zig' . 2>/dev/null | grep -v target | head -1 | grep -q ."
+- severity: critical
+
+# ── Provenance ───────────────────────────────────────────────────────────────
+
+### author-correct
+- description: Git author matches expected identity
+- run: "git log -1 --format='%ae' | grep -qE '(hyperpolymath|j\\.d\\.a\\.jewell)'"
+- severity: warning
+
+### license-content
+- description: LICENSE contains PMPL identifier
+- run: grep -q 'PMPL' LICENSE
+- severity: warning
+
+### spdx-headers-present
+- description: All source files have SPDX headers
+- run: "! find src/ api/ ffi/ -type f \\( -name '*.rs' -o -name '*.v' -o -name '*.idr' -o -name '*.ads' -o -name '*.adb' -o -name '*.zig' \\) 2>/dev/null | xargs grep -L 'SPDX-License-Identifier' 2>/dev/null | head -1 | grep -q ."
+- severity: warning
+
+# ── Export Control ────────────────────────────────────────────────────────────
+
+### export-control-doc-exists
+- description: EXPORT-CONTROL.md must be present
+- run: test -f EXPORT-CONTROL.md
+- severity: critical
+
+### no-offensive-markers
+- description: No offensive capability markers in source
+- run: "! grep -rEi '(offensive[_-]?weapon|lethal[_-]?force|targeting[_-]?system|kill[_-]?chain)' --include='*.rs' --include='*.v' --include='*.idr' --include='*.ads' --include='*.adb' --include='*.zig' . 2>/dev/null | head -1 | grep -q ."
+- severity: critical
+
+### defensive-use-annotation
+- description: Core modules declare defensive-use-only intent
+- run: grep -rq 'DEFENSIVE USE ONLY' src/rust/src/lib.rs 2>/dev/null
+- severity: warning
+
+### no-rf-captures
+- description: No real RF capture files in repository
+- run: "! find . -name '*.iq' -o -name '*.cf32' -o -name '*.sigmf-data' -o -name '*.sigmf-meta' -o -name '*.cfile' -o -name '*.fc32' 2>/dev/null | head -1 | grep -q ."
+- severity: critical
+
+# ── Cryptographic Provenance ──────────────────────────────────────────────────
+
+### no-weak-crypto
+- description: No MD5 or SHA1 used for security purposes
+- run: "! grep -rEi '(md5|sha1)' --include='*.rs' --include='*.v' --include='*.zig' . 2>/dev/null | grep -v 'legacy\\|compat\\|test\\|target' | head -1 | grep -q ."
+- severity: critical
+
+### pq-algorithms-present
+- description: Post-quantum algorithm references exist in crypto module
+- run: grep -rq 'kyber\|dilithium\|sphincs' src/rust/src/crypto/ 2>/dev/null || grep -rq 'Kyber\|Dilithium\|SPHINCS' src/abi/ 2>/dev/null
+- severity: warning
+
+# ── Formal Verification ──────────────────────────────────────────────────────
+
+### idris2-totality
+- description: Idris2 ABI files use total functions only
+- run: "! grep -rPn '\\bpartial\\b|\\bbelieve_me\\b|\\bassert_total\\b|\\bunsafePerformIO\\b|\\bunsafeCoerce\\b' src/abi/ 2>/dev/null | head -1 | grep -q ."
+- severity: critical
+
+### spark-no-suppressed-checks
+- description: SPARK code does not suppress runtime checks
+- run: "! grep -rn 'pragma Suppress\\|Unchecked_Conversion\\|Unchecked_Deallocation\\|Unchecked_Access' src/spark/ 2>/dev/null | head -1 | grep -q ."
+- severity: critical
+
+### rust-no-unjustified-unsafe
+- description: Rust unsafe blocks must have justification comments
+- run: "! grep -B1 'unsafe {' src/rust/src/**/*.rs 2>/dev/null | grep -v '// SAFETY:' | grep 'unsafe {' | head -1 | grep -q ."
+- severity: warning
+
+# ── Container Security ────────────────────────────────────────────────────────
+
+### container-images-pinned
+- description: Containerfile uses pinned Chainguard base images
+- run: test ! -f Containerfile || grep -q 'cgr.dev\|@sha256:' Containerfile
+- severity: warning
+
+### no-dockerfile
+- description: No Dockerfile (use Containerfile)
+- run: test ! -f Dockerfile
+- severity: warning
+
+# ── Build Integrity ───────────────────────────────────────────────────────────
+
+### cargo-lock-present
+- description: Cargo.lock committed for reproducible builds
+- run: test ! -f src/rust/Cargo.toml || test -f src/rust/Cargo.lock
+- severity: warning
+
+---
+### [SIGNATURE_BLOCK]
+primary:
+  algorithm: "Ed448+Dilithium5"
+  signature: |
+    -----BEGIN HYBRID SIGNATURE-----
+    BASE64_Ed448+Dilithium5_SIGNATURE_OF_THIS_FILE
+    -----END HYBRID SIGNATURE-----
+  signedBy: "did:web:github.com:hyperpolymath:robodog-ecm#primary-sig"
+  proof: "src/abi/Proofs/Signature.idr"
+fallback:
+  algorithm: "SPHINCS+"
+  signature: |
+    -----BEGIN SPHINCS+ SIGNATURE-----
+    BASE64_SPHINCS+_SIGNATURE_OF_THIS_FILE
+    -----END SPHINCS+ SIGNATURE-----
+  proof: "src/abi/Proofs/SignatureFallback.idr"
+
+---
+### [DEPLOYMENT]
+1. Replace all `BASE64_*` and `HEX_*` placeholders with real values.
+2. Generate Idris2 proofs:
+   ```bash
+   cd src/abi && idris2 --check Types.idr
+   ```
+3. Run SPARK proofs:
+   ```bash
+   cd src/spark && gnatprove -P robodog_ecm.gpr --level=2
+   ```
+4. Sign the Trustfile:
+   ```bash
+   cerro-sign sign contractiles/trust/Trustfile.a2ml --key-id robodog-ecm-release
+   ```
+5. Update integrity hashes:
+   ```bash
+   sha3sum -a 512 contractiles/trust/Trustfile.a2ml
+   shake256sum contractiles/trust/Trustfile.a2ml
+   ```
+6. Verify all operational checks pass:
+   ```bash
+   bash contractiles/trust/run-checks.sh
+   ```

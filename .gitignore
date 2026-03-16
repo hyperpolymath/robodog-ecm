@@ -24,7 +24,8 @@ Thumbs.db
 /.elixir_ls/
 
 # Rust
-# Cargo.lock  # Keep for binaries
+src/rust/target/
+# Cargo.lock  # Keep for reproducible builds
 
 # Elixir
 /cover/
@@ -50,6 +51,16 @@ __pycache__/
 *.ali
 /obj/
 /bin/
+src/spark/obj/
+src/spark/proof/
+
+# Zig
+ffi/zig/.zig-cache/
+ffi/zig/zig-out/
+
+# Idris2
+src/abi/build/
+src/abi/**/*.ibc
 
 # Haskell
 /.stack-work/

@@ -1,32 +1,106 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
-# justfile - Just recipes for this project
-# See: https://github.com/hyperpolymath/mustfile
+# justfile — Build recipes for Robodog ECM
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
 
-# Default recipe
+# Default recipe — list all available commands.
 default:
     @just --list
 
-# Build the project
-build:
-    @echo "Build not configured yet"
+# ── Build ────────────────────────────────────────────────────────────────
 
-# Run tests
-test:
-    @echo "Tests not configured yet"
+# Build the Rust core library.
+build-rust:
+    cd src/rust && cargo build --release
 
-# Format code
-fmt:
-    @echo "Formatting not configured yet"
+# Build the Zig FFI shared library.
+build-zig:
+    cd ffi/zig && zig build
 
-# Lint code
-lint:
-    @echo "Linting not configured yet"
+# Build all components.
+build: build-rust build-zig
 
-# Clean build artifacts
-clean:
-    @echo "Clean not configured yet"
+# ── Test ─────────────────────────────────────────────────────────────────
 
-# [AUTO-GENERATED] Multi-arch / RISC-V target
+# Run Rust tests.
+test-rust:
+    cd src/rust && cargo test
+
+# Run Zig FFI tests.
+test-zig:
+    cd ffi/zig && zig build test
+
+# Run Trustfile operational checks.
+test-trust:
+    bash contractiles/trust/run-checks.sh
+
+# Run all tests.
+test: test-rust test-zig test-trust
+
+# ── Lint / Format ────────────────────────────────────────────────────────
+
+# Lint Rust with Clippy.
+lint-rust:
+    cd src/rust && cargo clippy -- -D warnings
+
+# Format Rust source.
+fmt-rust:
+    cd src/rust && cargo fmt
+
+# Format Zig source.
+fmt-zig:
+    cd ffi/zig && zig fmt src/ test/
+
+# Lint all.
+lint: lint-rust
+
+# Format all.
+fmt: fmt-rust fmt-zig
+
+# ── Formal Verification ─────────────────────────────────────────────────
+
+# Typecheck Idris2 ABI definitions.
+check-abi:
+    cd src/abi && idris2 --check Types.idr
+
+# Run SPARK proofs.
+prove-spark:
+    cd src/spark && gnatprove -P robodog_ecm.gpr --level=2
+
+# Run all formal verification.
+verify: check-abi prove-spark
+
+# ── Clean ────────────────────────────────────────────────────────────────
+
+# Clean Rust build artifacts.
+clean-rust:
+    cd src/rust && cargo clean
+
+# Clean Zig build artifacts.
+clean-zig:
+    cd ffi/zig && rm -rf .zig-cache zig-out
+
+# Clean SPARK proof artifacts.
+clean-spark:
+    cd src/spark && rm -rf obj proof
+
+# Clean all build artifacts.
+clean: clean-rust clean-zig clean-spark
+
+# ── Multi-arch ───────────────────────────────────────────────────────────
+
+# Build for RISC-V target.
 build-riscv:
-	@echo "Building for RISC-V..."
-	cross build --target riscv64gc-unknown-linux-gnu
+    cd src/rust && cross build --target riscv64gc-unknown-linux-gnu --release
+
+# ── Audit ────────────────────────────────────────────────────────────────
+
+# Run cargo-audit for dependency vulnerabilities.
+audit:
+    cd src/rust && cargo audit
+
+# ── Generated Files ──────────────────────────────────────────────────────
+
+# Regenerate C header from Zig FFI exports.
+gen-headers:
+    @echo "C header is at generated/abi/robodog_ffi.h"
+    @echo "Manual generation — update generated/abi/robodog_ffi.h when FFI changes."

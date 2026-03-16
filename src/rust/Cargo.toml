@@ -1,0 +1,56 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
+
+[package]
+name = "robodog-ecm"
+version = "0.1.0"
+edition = "2024"
+authors = ["Jonathan D.A. Jewell <j.d.a.jewell@open.ac.uk>"]
+license = "PMPL-1.0-or-later"
+description = "Electronic Countermeasures & Defensive Technologies research platform"
+repository = "https://github.com/hyperpolymath/robodog-ecm"
+readme = "../../README.adoc"
+keywords = ["ecm", "cryptography", "formation-control", "post-quantum", "defense"]
+categories = ["science", "cryptography"]
+
+[dependencies]
+# Post-quantum cryptography
+pqcrypto-kyber = "0.8"
+pqcrypto-dilithium = "0.5"
+pqcrypto-sphincsplus = "0.7"
+pqcrypto-traits = "0.3"
+
+# Classical crypto (hybrid mode)
+ed448-goldilocks-plus = "0.16"
+chacha20poly1305 = "0.10"
+aes-gcm = "0.10"
+sha3 = "0.10"
+hkdf = "0.12"
+
+# Signal processing
+rustfft = "6.2"
+num-complex = "0.4"
+
+# Serialisation
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "2"
+
+[dev-dependencies]
+proptest = "1"
+criterion = "0.5"
+
+[[bench]]
+name = "ecm_bench"
+harness = false
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = "symbols"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }

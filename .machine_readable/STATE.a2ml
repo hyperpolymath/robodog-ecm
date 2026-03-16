@@ -1,14 +1,44 @@
 # SPDX-License-Identifier: PMPL-1.0-or-later
 # STATE.a2ml — Project state checkpoint
-# Converted from STATE.scm on 2026-03-15
+# Updated: 2026-03-16
 
 [metadata]
 project = "robodog-ecm"
 version = "0.1.0"
-last-updated = "2026-03-15"
+last-updated = "2026-03-16"
 status = "active"
 
 [project-context]
 name = "robodog-ecm"
-completion-percentage = 0
-phase = "In development"
+completion-percentage = 40
+phase = "v0.1 Foundation"
+description = "Electronic Countermeasures & Defensive Technologies research platform"
+
+[technology-stack]
+core = "Rust"
+safety = "Ada/SPARK"
+abi = "Idris2"
+ffi = "Zig"
+api = "V-lang"
+
+[v0.1-progress]
+ecm-signal-analysis = "implemented — signals, detection, FFT spectrum"
+crypto-protocols = "implemented — Kyber1024, Dilithium5, SPHINCS+ round-trips"
+formation-control = "implemented — 5 shapes, separation checks, geometry"
+defensive-autonomy = "implemented — collision avoidance, safe-state, comms loss"
+spark-proofs = "specified — ecm_safety, formation_safety, autonomy_safety"
+idris2-abi = "implemented — Types, ECM, Crypto, Formation, Foreign"
+zig-ffi = "implemented — classify, distance, formation, C header"
+v-api = "implemented — full type mirror, classify, recommend"
+trustfile = "complete — 780 lines, 18 operational checks"
+export-control = "complete — ITAR/EAR/Wassenaar framework"
+
+[blockers]
+none = "No blockers for v0.1 completion"
+
+[next-actions]
+1 = "Run cargo test to verify Rust builds"
+2 = "Run zig build test to verify FFI"
+3 = "Run gnatprove to verify SPARK proofs"
+4 = "Run idris2 --check to verify ABI"
+5 = "Commit, push, mirror"
