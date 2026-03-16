@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: PMPL-1.0-or-later
+# Clade declaration — part of the gv-clade-index registry
+# See: https://github.com/hyperpolymath/gv-clade-index
+
+[identity]
+uuid = "c4f57728-061a-51dc-b65f-7238aa6945d0"
+primary-forge = "github"
+primary-owner = "hyperpolymath"
+canonical-name = "robodog-ecm"
+prefixed-name = "rm-robodog-ecm"
+
+[clade]
+primary = "rm"
+secondary = ["ax"]
+assigned = "2026-03-16"
+rationale = ""
+
+[forges]
+github = "hyperpolymath/robodog-ecm"
+gitlab = "hyperpolymath/robodog-ecm"
+bitbucket = "hyperpolymath/robodog-ecm"
+
+[lineage]
+type = "standalone"
+parent = "Robot dog enterprise content management"
+born = "2026-03-16"
