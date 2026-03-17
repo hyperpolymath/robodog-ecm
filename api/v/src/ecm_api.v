@@ -142,11 +142,17 @@ pub fn recommend_response(snap SpectrumSnapshot) DefensiveRecommendation {
 
 // freq_in_band checks whether a frequency falls within a given band.
 pub fn freq_in_band(freq_hz u64, band FreqBand) bool {
-	lower, upper := match band {
-		.hf { u64(0), u64(30_000_000) }
-		.vhf { u64(30_000_000), u64(300_000_000) }
-		.uhf { u64(300_000_000), u64(3_000_000_000) }
-		.shf { u64(3_000_000_000), u64(30_000_000_000) }
+	lower := match band {
+		.hf { u64(0) }
+		.vhf { u64(30_000_000) }
+		.uhf { u64(300_000_000) }
+		.shf { u64(3_000_000_000) }
+	}
+	upper := match band {
+		.hf { u64(30_000_000) }
+		.vhf { u64(300_000_000) }
+		.uhf { u64(3_000_000_000) }
+		.shf { u64(30_000_000_000) }
 	}
 	return freq_hz >= lower && freq_hz < upper
 }

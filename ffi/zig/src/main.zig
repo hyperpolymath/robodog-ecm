@@ -78,7 +78,7 @@ const MAX_LEGITIMATE_BW_HZ: u64 = 40_000_000;
 ///   modulation:   Modulation enum value.
 ///
 /// Returns: SignalClass enum value.
-export fn robodog_classify_signal(
+pub export fn robodog_classify_signal(
     freq_hz: u64,
     bandwidth_hz: u64,
     snr_db: i32,
@@ -109,7 +109,7 @@ export fn robodog_classify_signal(
 /// Check whether a frequency falls within a given band.
 ///
 /// Returns: 1 if in band, 0 if not.
-export fn robodog_freq_in_band(freq_hz: u64, band: i32) callconv(.c) i32 {
+pub export fn robodog_freq_in_band(freq_hz: u64, band: i32) callconv(.c) i32 {
     const b: FreqBand = @enumFromInt(band);
     const lower: u64 = switch (b) {
         .hf => 0,
@@ -130,7 +130,7 @@ export fn robodog_freq_in_band(freq_hz: u64, band: i32) callconv(.c) i32 {
 /// Compute squared distance between two 3D positions (in mm^2).
 ///
 /// Uses integer arithmetic — no floating point, fully deterministic.
-export fn robodog_distance_squared_mm(
+pub export fn robodog_distance_squared_mm(
     ax: i64,
     ay: i64,
     az: i64,
@@ -147,7 +147,7 @@ export fn robodog_distance_squared_mm(
 /// Check ground separation safety (minimum 2.0m = 2000mm).
 ///
 /// Returns: 1 if safe, 0 if violation.
-export fn robodog_ground_safe(
+pub export fn robodog_ground_safe(
     ax: i64,
     ay: i64,
     az: i64,
@@ -163,7 +163,7 @@ export fn robodog_ground_safe(
 /// Check aerial separation safety (minimum 10.0m = 10000mm).
 ///
 /// Returns: 1 if safe, 0 if violation.
-export fn robodog_aerial_safe(
+pub export fn robodog_aerial_safe(
     ax: i64,
     ay: i64,
     az: i64,
@@ -180,7 +180,7 @@ export fn robodog_aerial_safe(
 ///
 /// Writes positions to out_buf as an array of Position3D structs.
 /// Returns: 0 on success, -1 on invalid parameters.
-export fn robodog_compute_formation(
+pub export fn robodog_compute_formation(
     shape: i32,
     num_agents: i32,
     spacing_mm: u64,

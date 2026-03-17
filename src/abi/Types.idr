@@ -9,6 +9,8 @@
 
 module Types
 
+import Data.Nat
+
 %default total
 
 ||| Frequency in Hertz. Positive and bounded to the SHF upper limit.

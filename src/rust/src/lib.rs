@@ -18,6 +18,7 @@
 //! - **Defensive autonomy** — collision avoidance, threat response, safe-state
 //!   transitions. All safety-critical logic has SPARK proof counterparts.
 
+#![forbid(unsafe_code)]
 pub mod autonomy;
 pub mod crypto;
 pub mod ecm;
