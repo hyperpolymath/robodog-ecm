@@ -7,7 +7,7 @@
 // with the SPARK safety proofs and Idris2 ABI type constraints.
 
 const std = @import("std");
-const main = @import("../src/main.zig");
+const main = @import("main");
 
 test "classification agrees across all frequency bands" {
     // A CW jammer should be classified the same regardless of band.
