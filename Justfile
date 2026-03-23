@@ -89,9 +89,6 @@ clean: clean-rust clean-zig clean-spark
 # ── Multi-arch ───────────────────────────────────────────────────────────
 
 # Build for RISC-V target.
-build-riscv:
-    cd src/rust && cross build --target riscv64gc-unknown-linux-gnu --release
-
 # ── Audit ────────────────────────────────────────────────────────────────
 
 # Run cargo-audit for dependency vulnerabilities.
