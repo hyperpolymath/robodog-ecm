@@ -3,41 +3,97 @@
 :toc:
 :icons: font
 
-The README makes claims. This file backs them up.
+The README makes claims. This file backs them up with evidence from real code.
 
-[quote, README]
+== Core Claims & Evidence
+
+=== Claim 1: "Cryptographic Protocol Suite: NIST Post-Quantum Standards"
+
+**From README** (line 56):
 ____
-See `EXPORT-CONTROL.md` for full compliance requirements.
+* **Cryptography:** Kyber1024, Dilithium5, SPHINCS+ (NIST PQC standards)
 ____
 
-== Technology Choices
+**Evidence**: `/var/mnt/eclipse/repos/robodog-ecm/src/crypto.rs` implements Kyber1024 (ML-KEM-1024), Dilithium5 (ML-DSA-87), SPHINCS+ via liboqs-rust bindings. Integration tests in `/var/mnt/eclipse/repos/robodog-ecm/tests/crypto_integration_test.rs` verify key exchange, signature generation, and serialization roundtrips.
 
-[cols="1,2"]
-|===
-| Technology | Learn More
+**Caveat**: Crypto implementations are *thin bindings* to liboqs (C library). No formal proofs of cryptographic correctness—only type-safe Rust wrappers around NIST reference implementations.
 
-| **Zig** | https://ziglang.org
-| **Idris2 ABI** | https://www.idris-lang.org
-|===
+=== Claim 2: "Idris2 ABI + Zig FFI for Formal Verification"
+
+**From README** (lines 51-52):
+____
+| ABI | **Idris2** | Dependent-type interface proofs
+| FFI | **Zig** | C-ABI bridge between ABI and core
+____
+
+**Evidence**: `/var/mnt/eclipse/repos/robodog-ecm/src/abi/` contains Idris2 type definitions for ECM signal classification (Types.idr), formation geometry (Formation.idr), and cryptographic operations (Crypto.idr). `/var/mnt/eclipse/repos/robodog-ecm/ffi/zig/src/main.zig` implements the Zig FFI layer exposing C-ABI functions that call into Rust core.
+
+**Caveat**: ABI proofs are *interface contracts only*. The Rust implementation (`src/ecm.rs`, `src/crypto.rs`) is NOT mechanically verified to match those contracts—correspondence is manual and property-tested via `/var/mnt/eclipse/repos/robodog-ecm/tests/` only.
+
+=== Claim 3: "Export Control Compliance: Defensive Use Only"
+
+**From README** (lines 77-86):
+____
+This project follows strict export control policies:
+1. **No offensive capabilities** - Defensive technologies only
+2. **No unauthorized export** - Compliance with ITAR/EAR regulations
+3. **Documented use cases** - All implementations have defensive justification
+4. **Access control** - Contributors must acknowledge export restrictions
+____
+
+**Evidence**: `/var/mnt/eclipse/repos/robodog-ecm/EXPORT-CONTROL.md` documents compliance framework. `/var/mnt/eclipse/repos/robodog-ecm/Trustfile` (780 lines, 18 operational checks) enforces defensive-use constraints at build and runtime.
+
+**Caveat**: Export control compliance depends on users *not* circumventing the code. Access control is voluntary (contributor acknowledgment). No cryptographic binding enforcement of "defensive use only" at execution time.
 
 == Dogfooded Across The Account
 
-Uses the hyperpolymath ABI/FFI standard (Idris2 + Zig). Same pattern used across
-https://github.com/hyperpolymath/proven[proven],
-https://github.com/hyperpolymath/burble[burble], and
-https://github.com/hyperpolymath/gossamer[gossamer].
+Uses the hyperpolymath ABI/FFI standard (Idris2 ABI + Zig FFI + V API). Same architectural pattern across:
+- https://github.com/hyperpolymath/proven-servers[proven-servers] — Protocol verification
+- https://github.com/hyperpolymath/burble[burble] — Telecom control plane
+- https://github.com/hyperpolymath/stapeln[stapeln] — Container validation
+- https://github.com/hyperpolymath/valence-shell[valence-shell] — Reversible operations
+
+All share: *Formal verification at boundaries, high-performance Rust inside, safe FFI exposed via Zig.*
 
 == File Map
 
-[cols="1,2"]
+[cols="1,3"]
 |===
-| Path | What's There
+| Path | Contents & Purpose
 
-| `src/` | Source code
-| `ffi/` | Foreign function interface
-| `test(s)/` | Test suite
+| `src/ecm.rs` | ECM signal analysis: FFT spectrum computation, signal detection, interference classification. No formal proofs—empirical algorithms.
+
+| `src/crypto.rs` | Post-quantum cryptography: Kyber1024 key encapsulation, Dilithium5 digital signatures, SPHINCS+ hash-based fallback. Thin bindings to liboqs.
+
+| `src/formation.rs` | Formation control: 5 shapes (line, wedge, diamond, circle, grid), separation distance calculations, collision avoidance logic. Geometry functions but no formal proofs of safety.
+
+| `src/autonomy.rs` | Defensive autonomy: safe-state transitions, threat detection, comms-loss recovery. State machines without formal model checking.
+
+| `src/abi/Types.idr` | Idris2 dependent types: ECMSignal (frequency, power, classification), Formation (shape, spacing, orientation), CryptoKey (algorithm, parameter witnesses). Interfaces only.
+
+| `src/abi/ECM.idr` | Idris2 ECM classification interface proving signal type correctness.
+
+| `src/abi/Formation.idr` | Idris2 formation geometry proofs: separation distance bounds, collision impossibility proofs.
+
+| `src/abi/Crypto.idr` | Idris2 key exchange and signature interface contracts.
+
+| `src/abi/Foreign.idr` | FFI boundary specification: C function declarations, parameter/return type contracts.
+
+| `ffi/zig/src/main.zig` | Zig FFI bridge: C-ABI compatible runtime exposing signal classification, distance checks, formation validation. Calls into Rust implementations.
+
+| `api/v-lang/` | V-language public API: type mirrors of Idris2 ABI, query functions for classification and recommendations.
+
+| `spark/` | Ada/SPARK safety specs: formal specifications (not proofs) of ECM, formation, and autonomy safety invariants.
+
+| `tests/crypto_integration_test.rs` | Crypto roundtrip tests: key generation, encapsulation/decapsulation, signature generation/verification.
+
+| `tests/formation_test.rs` | Formation geometry validation: separation distance calculations, collision detection.
+
+| `EXPORT-CONTROL.md` | Compliance framework: ITAR/EAR/Wassenaar categories, defensive justification, access control policy.
+
+| `Trustfile` | Comprehensive trust boundary specification (780 lines, 18 operational checks).
 |===
 
 == Questions?
 
-Open an issue or reach out directly — happy to explain anything in more detail.
+Open an issue or reach out at j.d.a.jewell@open.ac.uk — happy to explain the ECM architecture, formal verification boundaries, and export control design.
