@@ -146,6 +146,52 @@ fn bench_autonomy_decision(c: &mut Criterion) {
     });
 }
 
+fn bench_position_distance(c: &mut Criterion) {
+    let pos1 = robodog_ecm::formation::Position { x: 0.0, y: 0.0, z: 0.0 };
+    let pos2 = robodog_ecm::formation::Position { x: 100.0, y: 100.0, z: 50.0 };
+    c.bench_function("position_distance", |b| {
+        b.iter(|| black_box(pos1.distance_to(&pos2)))
+    });
+}
+
+fn bench_velocity_speed(c: &mut Criterion) {
+    let vel = robodog_ecm::formation::Velocity { vx: 3.0, vy: 4.0, vz: 0.0 };
+    c.bench_function("velocity_speed", |b| {
+        b.iter(|| black_box(vel.speed()))
+    });
+}
+
+fn bench_formation_wedge_8(c: &mut Criterion) {
+    let ids: Vec<u32> = (1..=8).collect();
+    let params = robodog_ecm::formation::FormationParams {
+        shape: robodog_ecm::formation::FormationShape::Wedge,
+        spacing_m: 15.0,
+        heading_deg: 0.0,
+        centre: robodog_ecm::formation::Position { x: 0.0, y: 0.0, z: 0.0 },
+    };
+    c.bench_function("formation_wedge_8_agents", |b| {
+        b.iter(|| black_box(compute_formation_positions(&ids, &params)))
+    });
+}
+
+fn bench_separation_check(c: &mut Criterion) {
+    let agents: Vec<AgentState> = (1..=10)
+        .map(|id| AgentState {
+            id,
+            position: robodog_ecm::formation::Position {
+                x: (id as f64) * 10.0,
+                y: 0.0,
+                z: 0.0,
+            },
+            velocity: robodog_ecm::formation::Velocity { vx: 0.0, vy: 0.0, vz: 0.0 },
+            operational: true,
+        })
+        .collect();
+    c.bench_function("separation_check_10_agents", |b| {
+        b.iter(|| black_box(robodog_ecm::formation::check_separation(&agents, 5.0)))
+    });
+}
+
 criterion_group!(
     benches,
     bench_signal_generation,
@@ -155,6 +201,10 @@ criterion_group!(
     bench_kyber1024_encap_decap,
     bench_dilithium5_sign,
     bench_formation_circle_16,
+    bench_formation_wedge_8,
+    bench_position_distance,
+    bench_velocity_speed,
+    bench_separation_check,
     bench_autonomy_decision,
 );
 criterion_main!(benches);

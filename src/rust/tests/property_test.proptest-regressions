@@ -1,0 +1,7 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 263979db7c2525fca29eeb289919aac028a516c171d8a6bfcd2ae7f072dfb603 # shrinks to id = 1, params = FormationParams { shape: Diamond, spacing_m: 1.0, heading_deg: 0.0, centre: Position { x: 0.0, y: 0.0, z: 0.0 } }
