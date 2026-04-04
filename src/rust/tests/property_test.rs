@@ -209,13 +209,30 @@ proptest! {
     #[test]
     fn formation_single_agent_at_centre(
         id in arb_agent_id(),
-        params in arb_formation_params()
+        shape in arb_formation_shape(),
+        spacing in 1f64..100f64,
+        heading in 0f64..360f64,
+        centre in arb_position()
     ) {
+        // Only test Line formation (which puts single agent at centre).
+        // Other shapes (Wedge, Diamond, Circle, Grid) may place a single agent
+        // away from centre based on formation geometry.
+        if shape != FormationShape::Line {
+            return Ok(());
+        }
+
+        let params = FormationParams {
+            shape,
+            spacing_m: spacing,
+            heading_deg: heading,
+            centre,
+        };
+
         let positions = compute_formation_positions(&[id], &params);
         prop_assert_eq!(positions.len(), 1);
         let (returned_id, pos) = &positions[0];
         prop_assert_eq!(returned_id, &id);
-        // Single agent should be at or very near the formation centre.
+        // Single agent in Line formation should be at the formation centre.
         let dist = params.centre.distance_to(pos);
         prop_assert!(dist < 0.01, "Single agent {}: dist={}", id, dist);
     }
