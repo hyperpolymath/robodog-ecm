@@ -1,65 +1,217 @@
--- SPDX-License-Identifier: PMPL-1.0-or-later
--- Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
---
--- Foreign.idr — FFI foreign function declarations (Zig bridge).
---
--- Declares the C-ABI-compatible functions implemented in ffi/zig/
--- that bridge between the Idris2 type universe and the Rust core.
+||| SPDX-License-Identifier: PMPL-1.0-or-later
+||| Foreign Function Interface Declarations for ROBODOG_ECM
+|||
+||| This module declares all C-compatible functions that will be
+||| implemented in the Zig FFI layer.
+|||
+||| All functions are declared here with type signatures and safety proofs.
+||| Implementations live in ffi/zig/
 
-module Foreign
+module RobodogEcm.ABI.Foreign
 
-import Types
-import Crypto
+import RobodogEcm.ABI.Types
+import RobodogEcm.ABI.Layout
 
 %default total
 
-||| FFI result type — success or error code.
+--------------------------------------------------------------------------------
+-- Library Lifecycle
+--------------------------------------------------------------------------------
+
+||| Initialize the library
+||| Returns a handle to the library instance, or Nothing on failure
+export
+%foreign "C:robodog_ecm_init, librobodog_ecm"
+prim__init : PrimIO Bits64
+
+||| Safe wrapper for library initialization
+export
+init : IO (Maybe Handle)
+init = do
+  ptr <- primIO prim__init
+  pure (createHandle ptr)
+
+||| Clean up library resources
+export
+%foreign "C:robodog_ecm_free, librobodog_ecm"
+prim__free : Bits64 -> PrimIO ()
+
+||| Safe wrapper for cleanup
+export
+free : Handle -> IO ()
+free h = primIO (prim__free (handlePtr h))
+
+--------------------------------------------------------------------------------
+-- Core Operations
+--------------------------------------------------------------------------------
+
+||| Example operation: process data
+export
+%foreign "C:robodog_ecm_process, librobodog_ecm"
+prim__process : Bits64 -> Bits32 -> PrimIO Bits32
+
+||| Safe wrapper with error handling
+export
+process : Handle -> Bits32 -> IO (Either Result Bits32)
+process h input = do
+  result <- primIO (prim__process (handlePtr h) input)
+  pure $ case result of
+    0 => Left Error
+    n => Right n
+
+--------------------------------------------------------------------------------
+-- String Operations
+--------------------------------------------------------------------------------
+
+||| Convert C string to Idris String
+export
+%foreign "support:idris2_getString, libidris2_support"
+prim__getString : Bits64 -> String
+
+||| Free C string
+export
+%foreign "C:robodog_ecm_free_string, librobodog_ecm"
+prim__freeString : Bits64 -> PrimIO ()
+
+||| Get string result from library
+export
+%foreign "C:robodog_ecm_get_string, librobodog_ecm"
+prim__getResult : Bits64 -> PrimIO Bits64
+
+||| Safe string getter
+export
+getString : Handle -> IO (Maybe String)
+getString h = do
+  ptr <- primIO (prim__getResult (handlePtr h))
+  if ptr == 0
+    then pure Nothing
+    else do
+      let str = prim__getString ptr
+      primIO (prim__freeString ptr)
+      pure (Just str)
+
+--------------------------------------------------------------------------------
+-- Array/Buffer Operations
+--------------------------------------------------------------------------------
+
+||| Process array data
+export
+%foreign "C:robodog_ecm_process_array, librobodog_ecm"
+prim__processArray : Bits64 -> Bits64 -> Bits32 -> PrimIO Bits32
+
+||| Safe array processor
+export
+processArray : Handle -> (buffer : Bits64) -> (len : Bits32) -> IO (Either Result ())
+processArray h buf len = do
+  result <- primIO (prim__processArray (handlePtr h) buf len)
+  pure $ case resultFromInt result of
+    Just Ok => Right ()
+    Just err => Left err
+    Nothing => Left Error
+  where
+    resultFromInt : Bits32 -> Maybe Result
+    resultFromInt 0 = Just Ok
+    resultFromInt 1 = Just Error
+    resultFromInt 2 = Just InvalidParam
+    resultFromInt 3 = Just OutOfMemory
+    resultFromInt 4 = Just NullPointer
+    resultFromInt _ = Nothing
+
+--------------------------------------------------------------------------------
+-- Error Handling
+--------------------------------------------------------------------------------
+
+||| Get last error message
+export
+%foreign "C:robodog_ecm_last_error, librobodog_ecm"
+prim__lastError : PrimIO Bits64
+
+||| Retrieve last error as string
+export
+lastError : IO (Maybe String)
+lastError = do
+  ptr <- primIO prim__lastError
+  if ptr == 0
+    then pure Nothing
+    else pure (Just (prim__getString ptr))
+
+||| Get error description for result code
+export
+errorDescription : Result -> String
+errorDescription Ok = "Success"
+errorDescription Error = "Generic error"
+errorDescription InvalidParam = "Invalid parameter"
+errorDescription OutOfMemory = "Out of memory"
+errorDescription NullPointer = "Null pointer"
+
+--------------------------------------------------------------------------------
+-- Version Information
+--------------------------------------------------------------------------------
+
+||| Get library version
+export
+%foreign "C:robodog_ecm_version, librobodog_ecm"
+prim__version : PrimIO Bits64
+
+||| Get version as string
+export
+version : IO String
+version = do
+  ptr <- primIO prim__version
+  pure (prim__getString ptr)
+
+||| Get library build info
+export
+%foreign "C:robodog_ecm_build_info, librobodog_ecm"
+prim__buildInfo : PrimIO Bits64
+
+||| Get build information
+export
+buildInfo : IO String
+buildInfo = do
+  ptr <- primIO prim__buildInfo
+  pure (prim__getString ptr)
+
+--------------------------------------------------------------------------------
+-- Callback Support
+--------------------------------------------------------------------------------
+
+||| Callback function type (C ABI)
 public export
-data FFIResult : Type where
-  FFIOk  : FFIResult
-  FFIErr : (code : Nat) -> FFIResult
+Callback : Type
+Callback = Bits64 -> Bits32 -> Bits32
 
--- Foreign function declarations for the Zig FFI bridge.
--- These are the C-ABI functions that the Zig layer exports.
-
-||| Generate a Kyber1024 keypair via the Zig FFI.
-||| Writes the public key and secret key to the provided buffers.
-|||
-||| @pk_buf  Output buffer for public key (must be >= Kyber1024_PK_Size).
-||| @sk_buf  Output buffer for secret key (must be >= Kyber1024_SK_Size).
-||| @return  0 on success, non-zero error code on failure.
+||| Register a callback
 export
-%foreign "C:robodog_kyber1024_keygen,librobodog_ffi"
-robodog_kyber1024_keygen : (pk_buf : AnyPtr) -> (sk_buf : AnyPtr) -> PrimIO Int
+%foreign "C:robodog_ecm_register_callback, librobodog_ecm"
+prim__registerCallback : Bits64 -> AnyPtr -> PrimIO Bits32
 
-||| Encapsulate a shared secret using a Kyber1024 public key.
-|||
-||| @pk      Public key buffer (Kyber1024_PK_Size bytes).
-||| @ct_buf  Output buffer for ciphertext (Kyber1024_CT_Size bytes).
-||| @ss_buf  Output buffer for shared secret (Kyber1024_SS_Size bytes).
-||| @return  0 on success.
+||| Safe callback registration
 export
-%foreign "C:robodog_kyber1024_encapsulate,librobodog_ffi"
-robodog_kyber1024_encapsulate : (pk : AnyPtr) -> (ct_buf : AnyPtr) -> (ss_buf : AnyPtr) -> PrimIO Int
+registerCallback : Handle -> Callback -> IO (Either Result ())
+registerCallback h cb = do
+  result <- primIO (prim__registerCallback (handlePtr h) (cast cb))
+  pure $ case resultFromInt result of
+    Just Ok => Right ()
+    Just err => Left err
+    Nothing => Left Error
+  where
+    resultFromInt : Bits32 -> Maybe Result
+    resultFromInt 0 = Just Ok
+    resultFromInt _ = Just Error
 
-||| Classify a signal based on its characteristics.
-|||
-||| @freq_hz      Centre frequency in Hz.
-||| @bandwidth_hz Bandwidth in Hz.
-||| @snr_db       Signal-to-noise ratio in dB (x100 integer).
-||| @modulation   Modulation type enum value.
-||| @return       SignalClass enum value (0=Friendly, 1=Neutral, 2=Interference, 3=SuspectedJammer).
-export
-%foreign "C:robodog_classify_signal,librobodog_ffi"
-robodog_classify_signal : (freq_hz : Bits64) -> (bandwidth_hz : Bits64) -> (snr_db : Int) -> (modulation : Int) -> PrimIO Int
+--------------------------------------------------------------------------------
+-- Utility Functions
+--------------------------------------------------------------------------------
 
-||| Compute formation positions for a set of agents.
-|||
-||| @shape       Formation shape enum (0=Line, 1=Wedge, 2=Circle, 3=Diamond, 4=Grid).
-||| @num_agents  Number of agents.
-||| @spacing_mm  Spacing in millimetres.
-||| @out_buf     Output buffer for positions (num_agents * 3 * sizeof(int64)).
-||| @return      0 on success.
+||| Check if library is initialized
 export
-%foreign "C:robodog_compute_formation,librobodog_ffi"
-robodog_compute_formation : (shape : Int) -> (num_agents : Int) -> (spacing_mm : Bits64) -> (out_buf : AnyPtr) -> PrimIO Int
+%foreign "C:robodog_ecm_is_initialized, librobodog_ecm"
+prim__isInitialized : Bits64 -> PrimIO Bits32
+
+||| Check initialization status
+export
+isInitialized : Handle -> IO Bool
+isInitialized h = do
+  result <- primIO (prim__isInitialized (handlePtr h))
+  pure (result /= 0)

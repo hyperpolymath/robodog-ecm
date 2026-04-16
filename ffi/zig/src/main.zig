@@ -1,279 +1,274 @@
+// ROBODOG_ECM FFI Implementation
+//
+// This module implements the C-compatible FFI declared in src/abi/Foreign.idr
+// All types and layouts must match the Idris2 ABI definitions.
+//
 // SPDX-License-Identifier: PMPL-1.0-or-later
-// Copyright (c) 2026 Jonathan D.A. Jewell (hyperpolymath) <j.d.a.jewell@open.ac.uk>
-//
-// main.zig — Zig FFI bridge for Robodog ECM.
-//
-// DEFENSIVE USE ONLY — C-ABI bridge between Idris2 types and Rust core.
-// All exported functions have the `robodog_` prefix for namespace safety.
 
 const std = @import("std");
-const math = std.math;
 
-// ============================================================================
-// Type definitions matching the Idris2 ABI (src/abi/Types.idr)
-// ============================================================================
+// Version information (keep in sync with project)
+const VERSION = "0.1.0";
+const BUILD_INFO = "ROBODOG_ECM built with Zig " ++ @import("builtin").zig_version_string;
 
-/// Frequency band enumeration (matches Idris2 FreqBand).
-pub const FreqBand = enum(i32) {
-    hf = 0,
-    vhf = 1,
-    uhf = 2,
-    shf = 3,
-};
+/// Thread-local error storage
+threadlocal var last_error: ?[]const u8 = null;
 
-/// Signal modulation scheme (matches Idris2 Modulation).
-pub const Modulation = enum(i32) {
-    cw = 0,
-    am = 1,
-    fm = 2,
-    psk = 3,
-    fsk = 4,
-    ofdm = 5,
-    fhss = 6,
-    dsss = 7,
-};
-
-/// Signal classification (matches Idris2 SignalClass).
-pub const SignalClass = enum(i32) {
-    friendly = 0,
-    neutral = 1,
-    interference = 2,
-    suspected_jammer = 3,
-};
-
-/// Formation shape (matches Idris2 FormationShape).
-pub const FormationShape = enum(i32) {
-    line = 0,
-    wedge = 1,
-    circle = 2,
-    diamond = 3,
-    grid = 4,
-};
-
-/// 3D position in millimetres (matches Idris2 Position3D).
-pub const Position3D = extern struct {
-    x: i64,
-    y: i64,
-    z: i64,
-};
-
-// ============================================================================
-// Detection thresholds (matching Rust DetectionThresholds)
-// ============================================================================
-
-const INTERFERENCE_SNR_DB: i32 = 2000; // 20.0 dB * 100
-const WIDEBAND_THRESHOLD_HZ: u64 = 10_000_000;
-const MAX_LEGITIMATE_BW_HZ: u64 = 40_000_000;
-
-// ============================================================================
-// Exported C-ABI functions
-// ============================================================================
-
-/// Classify a signal based on its characteristics.
-///
-/// Parameters:
-///   freq_hz:      Centre frequency in Hz.
-///   bandwidth_hz: Bandwidth in Hz.
-///   snr_db:       SNR in dB * 100 (integer fixed-point).
-///   modulation:   Modulation enum value.
-///
-/// Returns: SignalClass enum value.
-pub export fn robodog_classify_signal(
-    freq_hz: u64,
-    bandwidth_hz: u64,
-    snr_db: i32,
-    modulation: i32,
-) callconv(.c) i32 {
-    _ = freq_hz; // Frequency not used in v0.1 classification rules.
-
-    const mod_enum: Modulation = @enumFromInt(modulation);
-
-    // Rule 1: CW with high SNR and wide bandwidth = barrage jamming.
-    if (mod_enum == .cw and snr_db > INTERFERENCE_SNR_DB and bandwidth_hz > WIDEBAND_THRESHOLD_HZ) {
-        return @intFromEnum(SignalClass.suspected_jammer);
-    }
-
-    // Rule 2: Exceeding maximum legitimate bandwidth.
-    if (bandwidth_hz > MAX_LEGITIMATE_BW_HZ) {
-        return @intFromEnum(SignalClass.suspected_jammer);
-    }
-
-    // Rule 3: High-power unknown modulation.
-    if (modulation > 7 and snr_db > INTERFERENCE_SNR_DB) {
-        return @intFromEnum(SignalClass.interference);
-    }
-
-    return @intFromEnum(SignalClass.neutral);
+/// Set the last error message
+fn setError(msg: []const u8) void {
+    last_error = msg;
 }
 
-/// Check whether a frequency falls within a given band.
-///
-/// Returns: 1 if in band, 0 if not.
-pub export fn robodog_freq_in_band(freq_hz: u64, band: i32) callconv(.c) i32 {
-    const b: FreqBand = @enumFromInt(band);
-    const lower: u64 = switch (b) {
-        .hf => 0,
-        .vhf => 30_000_000,
-        .uhf => 300_000_000,
-        .shf => 3_000_000_000,
-    };
-    const upper: u64 = switch (b) {
-        .hf => 30_000_000,
-        .vhf => 300_000_000,
-        .uhf => 3_000_000_000,
-        .shf => 30_000_000_000,
+/// Clear the last error
+fn clearError() void {
+    last_error = null;
+}
+
+//==============================================================================
+// Core Types (must match src/abi/Types.idr)
+//==============================================================================
+
+/// Result codes (must match Idris2 Result type)
+pub const Result = enum(c_int) {
+    ok = 0,
+    @"error" = 1,
+    invalid_param = 2,
+    out_of_memory = 3,
+    null_pointer = 4,
+};
+
+/// Library handle (opaque to prevent direct access)
+pub const Handle = opaque {
+    // Internal state hidden from C
+    allocator: std.mem.Allocator,
+    initialized: bool,
+    // Add your fields here
+};
+
+//==============================================================================
+// Library Lifecycle
+//==============================================================================
+
+/// Initialize the library
+/// Returns a handle, or null on failure
+export fn robodog_ecm_init() ?*Handle {
+    const allocator = std.heap.c_allocator;
+
+    const handle = allocator.create(Handle) catch {
+        setError("Failed to allocate handle");
+        return null;
     };
 
-    return if (freq_hz >= lower and freq_hz < upper) 1 else 0;
+    // Initialize handle
+    handle.* = .{
+        .allocator = allocator,
+        .initialized = true,
+    };
+
+    clearError();
+    return handle;
 }
 
-/// Compute squared distance between two 3D positions (in mm^2).
-///
-/// Uses integer arithmetic — no floating point, fully deterministic.
-pub export fn robodog_distance_squared_mm(
-    ax: i64,
-    ay: i64,
-    az: i64,
-    bx: i64,
-    by: i64,
-    bz: i64,
-) callconv(.c) i64 {
-    const dx = ax - bx;
-    const dy = ay - by;
-    const dz = az - bz;
-    return dx * dx + dy * dy + dz * dz;
+/// Free the library handle
+export fn robodog_ecm_free(handle: ?*Handle) void {
+    const h = handle orelse return;
+    const allocator = h.allocator;
+
+    // Clean up resources
+    h.initialized = false;
+
+    allocator.destroy(h);
+    clearError();
 }
 
-/// Check ground separation safety (minimum 2.0m = 2000mm).
-///
-/// Returns: 1 if safe, 0 if violation.
-pub export fn robodog_ground_safe(
-    ax: i64,
-    ay: i64,
-    az: i64,
-    bx: i64,
-    by: i64,
-    bz: i64,
-) callconv(.c) i32 {
-    const dist_sq = robodog_distance_squared_mm(ax, ay, az, bx, by, bz);
-    // 2000mm squared = 4,000,000
-    return if (dist_sq >= 4_000_000) 1 else 0;
-}
+//==============================================================================
+// Core Operations
+//==============================================================================
 
-/// Check aerial separation safety (minimum 10.0m = 10000mm).
-///
-/// Returns: 1 if safe, 0 if violation.
-pub export fn robodog_aerial_safe(
-    ax: i64,
-    ay: i64,
-    az: i64,
-    bx: i64,
-    by: i64,
-    bz: i64,
-) callconv(.c) i32 {
-    const dist_sq = robodog_distance_squared_mm(ax, ay, az, bx, by, bz);
-    // 10000mm squared = 100,000,000
-    return if (dist_sq >= 100_000_000) 1 else 0;
-}
+/// Process data (example operation)
+export fn robodog_ecm_process(handle: ?*Handle, input: u32) Result {
+    const h = handle orelse {
+        setError("Null handle");
+        return .null_pointer;
+    };
 
-/// Compute formation positions for a given shape.
-///
-/// Writes positions to out_buf as an array of Position3D structs.
-/// Returns: 0 on success, -1 on invalid parameters.
-pub export fn robodog_compute_formation(
-    shape: i32,
-    num_agents: i32,
-    spacing_mm: u64,
-    out_buf: [*]Position3D,
-) callconv(.c) i32 {
-    if (num_agents <= 0 or num_agents > 256) return -1;
-
-    const n: usize = @intCast(num_agents);
-    const sp: f64 = @floatFromInt(spacing_mm);
-    const shape_enum: FormationShape = @enumFromInt(shape);
-
-    switch (shape_enum) {
-        .line => {
-            const start = -(@as(f64, @floatFromInt(n)) - 1.0) / 2.0 * sp;
-            for (0..n) |i| {
-                const fi: f64 = @floatFromInt(i);
-                out_buf[i] = .{
-                    .x = @intFromFloat(start + fi * sp),
-                    .y = 0,
-                    .z = 0,
-                };
-            }
-        },
-        .circle => {
-            if (n <= 1) {
-                out_buf[0] = .{ .x = 0, .y = 0, .z = 0 };
-                return 0;
-            }
-            const angle_step = 2.0 * math.pi / @as(f64, @floatFromInt(n));
-            const radius = sp / (2.0 * @sin(angle_step / 2.0));
-            for (0..n) |i| {
-                const angle = @as(f64, @floatFromInt(i)) * angle_step;
-                out_buf[i] = .{
-                    .x = @intFromFloat(radius * @cos(angle)),
-                    .y = @intFromFloat(radius * @sin(angle)),
-                    .z = 0,
-                };
-            }
-        },
-        else => {
-            // Wedge, Diamond, Grid — v0.2.
-            // For now, fall back to line formation.
-            const start = -(@as(f64, @floatFromInt(n)) - 1.0) / 2.0 * sp;
-            for (0..n) |i| {
-                const fi: f64 = @floatFromInt(i);
-                out_buf[i] = .{
-                    .x = @intFromFloat(start + fi * sp),
-                    .y = 0,
-                    .z = 0,
-                };
-            }
-        },
+    if (!h.initialized) {
+        setError("Handle not initialized");
+        return .@"error";
     }
 
-    return 0;
+    // Example processing logic
+    _ = input;
+
+    clearError();
+    return .ok;
 }
 
-// ============================================================================
+//==============================================================================
+// String Operations
+//==============================================================================
+
+/// Get a string result (example)
+/// Caller must free the returned string
+export fn robodog_ecm_get_string(handle: ?*Handle) ?[*:0]const u8 {
+    const h = handle orelse {
+        setError("Null handle");
+        return null;
+    };
+
+    if (!h.initialized) {
+        setError("Handle not initialized");
+        return null;
+    }
+
+    // Example: allocate and return a string
+    const result = h.allocator.dupeZ(u8, "Example result") catch {
+        setError("Failed to allocate string");
+        return null;
+    };
+
+    clearError();
+    return result.ptr;
+}
+
+/// Free a string allocated by the library
+export fn robodog_ecm_free_string(str: ?[*:0]const u8) void {
+    const s = str orelse return;
+    const allocator = std.heap.c_allocator;
+
+    const slice = std.mem.span(s);
+    allocator.free(slice);
+}
+
+//==============================================================================
+// Array/Buffer Operations
+//==============================================================================
+
+/// Process an array of data
+export fn robodog_ecm_process_array(
+    handle: ?*Handle,
+    buffer: ?[*]const u8,
+    len: u32,
+) Result {
+    const h = handle orelse {
+        setError("Null handle");
+        return .null_pointer;
+    };
+
+    const buf = buffer orelse {
+        setError("Null buffer");
+        return .null_pointer;
+    };
+
+    if (!h.initialized) {
+        setError("Handle not initialized");
+        return .@"error";
+    }
+
+    // Access the buffer
+    const data = buf[0..len];
+    _ = data;
+
+    // Process data here
+
+    clearError();
+    return .ok;
+}
+
+//==============================================================================
+// Error Handling
+//==============================================================================
+
+/// Get the last error message
+/// Returns null if no error
+export fn robodog_ecm_last_error() ?[*:0]const u8 {
+    const err = last_error orelse return null;
+
+    // Return C string (static storage, no need to free)
+    const allocator = std.heap.c_allocator;
+    const c_str = allocator.dupeZ(u8, err) catch return null;
+    return c_str.ptr;
+}
+
+//==============================================================================
+// Version Information
+//==============================================================================
+
+/// Get the library version
+export fn robodog_ecm_version() [*:0]const u8 {
+    return VERSION.ptr;
+}
+
+/// Get build information
+export fn robodog_ecm_build_info() [*:0]const u8 {
+    return BUILD_INFO.ptr;
+}
+
+//==============================================================================
+// Callback Support
+//==============================================================================
+
+/// Callback function type (C ABI)
+pub const Callback = *const fn (u64, u32) callconv(.C) u32;
+
+/// Register a callback
+export fn robodog_ecm_register_callback(
+    handle: ?*Handle,
+    callback: ?Callback,
+) Result {
+    const h = handle orelse {
+        setError("Null handle");
+        return .null_pointer;
+    };
+
+    const cb = callback orelse {
+        setError("Null callback");
+        return .null_pointer;
+    };
+
+    if (!h.initialized) {
+        setError("Handle not initialized");
+        return .@"error";
+    }
+
+    // Store callback for later use
+    _ = cb;
+
+    clearError();
+    return .ok;
+}
+
+//==============================================================================
+// Utility Functions
+//==============================================================================
+
+/// Check if handle is initialized
+export fn robodog_ecm_is_initialized(handle: ?*Handle) u32 {
+    const h = handle orelse return 0;
+    return if (h.initialized) 1 else 0;
+}
+
+//==============================================================================
 // Tests
-// ============================================================================
+//==============================================================================
 
-test "classify CW barrage jamming" {
-    const result = robodog_classify_signal(2_400_000_000, 50_000_000, 3000, 0);
-    try std.testing.expectEqual(@as(i32, 3), result); // suspected_jammer
+test "lifecycle" {
+    const handle = robodog_ecm_init() orelse return error.InitFailed;
+    defer robodog_ecm_free(handle);
+
+    try std.testing.expect(robodog_ecm_is_initialized(handle) == 1);
 }
 
-test "classify normal OFDM as neutral" {
-    const result = robodog_classify_signal(2_400_000_000, 20_000_000, 2500, 5);
-    try std.testing.expectEqual(@as(i32, 1), result); // neutral
+test "error handling" {
+    const result = robodog_ecm_process(null, 0);
+    try std.testing.expectEqual(Result.null_pointer, result);
+
+    const err = robodog_ecm_last_error();
+    try std.testing.expect(err != null);
 }
 
-test "VHF band check" {
-    try std.testing.expectEqual(@as(i32, 1), robodog_freq_in_band(150_000_000, 1));
-    try std.testing.expectEqual(@as(i32, 0), robodog_freq_in_band(500_000_000, 1));
-}
-
-test "ground separation safe" {
-    try std.testing.expectEqual(@as(i32, 1), robodog_ground_safe(0, 0, 0, 3000, 0, 0));
-    try std.testing.expectEqual(@as(i32, 0), robodog_ground_safe(0, 0, 0, 1000, 0, 0));
-}
-
-test "aerial separation safe" {
-    try std.testing.expectEqual(@as(i32, 1), robodog_aerial_safe(0, 0, 0, 15000, 0, 0));
-    try std.testing.expectEqual(@as(i32, 0), robodog_aerial_safe(0, 0, 0, 5000, 0, 0));
-}
-
-test "line formation positions" {
-    var buf: [4]Position3D = undefined;
-    const result = robodog_compute_formation(0, 4, 10000, &buf);
-    try std.testing.expectEqual(@as(i32, 0), result);
-    // 4 agents at 10m spacing: positions should be -15m, -5m, 5m, 15m.
-    try std.testing.expectEqual(@as(i64, -15000), buf[0].x);
-    try std.testing.expectEqual(@as(i64, -5000), buf[1].x);
-    try std.testing.expectEqual(@as(i64, 5000), buf[2].x);
-    try std.testing.expectEqual(@as(i64, 15000), buf[3].x);
+test "version" {
+    const ver = robodog_ecm_version();
+    const ver_str = std.mem.span(ver);
+    try std.testing.expectEqualStrings(VERSION, ver_str);
 }

@@ -147,6 +147,6 @@ mod tests {
 
         assert!(snapshot.has_jamming());
         assert_eq!(snapshot.count_by_class(SignalClassification::SuspectedJamming), 1);
-        assert_eq!(snapshot.strongest_signal().unwrap().snr_db, 60.0);
+        assert_eq!(snapshot.strongest_signal().expect("TODO: handle error").snr_db, 60.0);
     }
 }

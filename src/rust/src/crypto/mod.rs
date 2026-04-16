@@ -233,27 +233,27 @@ mod tests {
 
     #[test]
     fn kyber1024_round_trip() {
-        let keypair = kem_keygen(KemAlgorithm::Kyber1024).unwrap();
-        let encap = kem_encapsulate(&keypair.public_key, KemAlgorithm::Kyber1024).unwrap();
-        let decap = kem_decapsulate(&encap.ciphertext, &keypair.secret_key, KemAlgorithm::Kyber1024).unwrap();
+        let keypair = kem_keygen(KemAlgorithm::Kyber1024).expect("TODO: handle error");
+        let encap = kem_encapsulate(&keypair.public_key, KemAlgorithm::Kyber1024).expect("TODO: handle error");
+        let decap = kem_decapsulate(&encap.ciphertext, &keypair.secret_key, KemAlgorithm::Kyber1024).expect("TODO: handle error");
         assert_eq!(encap.shared_secret, decap);
     }
 
     #[test]
     fn dilithium5_sign_verify() {
-        let keypair = sig_keygen(SignatureAlgorithm::Dilithium5).unwrap();
+        let keypair = sig_keygen(SignatureAlgorithm::Dilithium5).expect("TODO: handle error");
         let message = b"DEFENSIVE USE ONLY";
-        let signed = sign(message, &keypair.secret_key, SignatureAlgorithm::Dilithium5).unwrap();
-        let opened = verify(&signed, &keypair.public_key, SignatureAlgorithm::Dilithium5).unwrap();
+        let signed = sign(message, &keypair.secret_key, SignatureAlgorithm::Dilithium5).expect("TODO: handle error");
+        let opened = verify(&signed, &keypair.public_key, SignatureAlgorithm::Dilithium5).expect("TODO: handle error");
         assert_eq!(opened, message);
     }
 
     #[test]
     fn sphincs_sign_verify() {
-        let keypair = sig_keygen(SignatureAlgorithm::SphincsPlusSha2256f).unwrap();
+        let keypair = sig_keygen(SignatureAlgorithm::SphincsPlusSha2256f).expect("TODO: handle error");
         let message = b"post-quantum fallback";
-        let signed = sign(message, &keypair.secret_key, SignatureAlgorithm::SphincsPlusSha2256f).unwrap();
-        let opened = verify(&signed, &keypair.public_key, SignatureAlgorithm::SphincsPlusSha2256f).unwrap();
+        let signed = sign(message, &keypair.secret_key, SignatureAlgorithm::SphincsPlusSha2256f).expect("TODO: handle error");
+        let opened = verify(&signed, &keypair.public_key, SignatureAlgorithm::SphincsPlusSha2256f).expect("TODO: handle error");
         assert_eq!(opened, message);
     }
 }
