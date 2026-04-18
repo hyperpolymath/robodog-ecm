@@ -24,7 +24,7 @@ Operational contracts for the Robodog ECM defensive technologies platform.
 # Run all Trustfile operational checks
 bash contractiles/trust/run-checks.sh
 
-# Run Mustfile invariants (via justfile)
+# Run Mustfile invariants (via Justfile)
 just test
 ----
 
