@@ -173,8 +173,8 @@ mod tests {
         let (peak_freq, _peak_power) = spectrum
             .iter()
             .copied()
-            .max_by(|a, b| a.1.partial_cmp(&b.1).expect("TODO: handle error"))
-            .expect("TODO: handle error");
+            .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+            .unwrap();
 
         // Peak should be within one frequency bin of 1000 Hz.
         let bin_width = sig.sample_rate_hz / sig.num_samples as f64;
