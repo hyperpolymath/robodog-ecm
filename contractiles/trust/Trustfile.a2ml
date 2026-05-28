@@ -323,15 +323,8 @@ languages:
       memory_safety: "Compile-time bounds checking, no hidden allocations"
       abi_compat: "Native C ABI, zero runtime overhead"
 
-  - name: "V"
-    role: "API layer (consumer-facing)"
-    location: "api/v/"
-    components: ["ecm_api", "crypto_api", "formation_api"]
-    build: "v build api/v/"
-    test: "v test api/v/"
-    security:
-      input_validation: "All external inputs validated at API boundary"
-      abi_verification: "Types checked against Idris2 ABI definitions"
+  # V-lang API layer removed 2026-05-28; the Zig FFI at ffi/zig/ is now the
+  # canonical consumer-facing API per estate-wide Zig=APIs+FFIs policy.
 
 ---
 ### [CONTAINER_SUPPLY_CHAIN]

@@ -14,13 +14,7 @@
                                        │
                                        ▼
                     ┌─────────────────────────────────────────────┐
-                    │            zig API LAYER                  │
-                    │         api/v/src/ecm_api.v                 │
-                    │   Consumer-facing types + classification     │
-                    └──────────────────┬──────────────────────────┘
-                                       │
-                    ┌──────────────────┼──────────────────────────┐
-                    │          ZIG FFI BRIDGE                      │
+                    │          ZIG API + FFI BRIDGE                │
                     │        ffi/zig/src/main.zig                 │
                     │    C-ABI ← generated/abi/robodog_ffi.h      │
                     └──────────────────┬──────────────────────────┘
@@ -77,12 +71,10 @@ IDRIS2 ABI (src/abi/)
   Formation Types                   ███░░░░░░░  30%    Coordinates, separation proofs
   FFI Declarations                  ███░░░░░░░  30%    Zig bridge bindings
 
-ZIG FFI (ffi/zig/)
+ZIG API + FFI (ffi/zig/)
   Signal Classification             ████░░░░░░  40%    3 rules, band checking
   Distance / Separation             █████░░░░░  50%    Ground + aerial, integer math
   Formation Computation             ███░░░░░░░  30%    Line + circle, rest TBD
-
-zig API (api/v/)
   ECM API                           ████░░░░░░  40%    Full type mirror, classify, recommend
   ABI Verification Types            ███░░░░░░░  30%    Round-trip proofs
 
